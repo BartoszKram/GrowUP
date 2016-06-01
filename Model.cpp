@@ -128,5 +128,6 @@ namespace Models {
 	void Model::drawSolid() {
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, this->vertices.size()); // Starting from vertex 0; 3 vertices total -> 1 triangle
+		glBindVertexArray(0);
 	}
 }
