@@ -5,6 +5,7 @@
 #include "targetver.h"
 #include "Model.h"
 #include "shaderprogram.h"
+#include "lodepng.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "GL/glew.h"
@@ -20,15 +21,38 @@ using namespace glm;
 
 
 Models::Model myModel("RoboDay.obj");
-//Models::Model myModel2("cube.obj");
+Models::Model cube("cube.obj");
+
+
+float speed_x = 0; // [radiany/s]
+float speed_y = 0; // [radiany/s]
 
 //Uchwyty na shadery
 ShaderProgram *shaderProgram; //WskaŸnik na obiekt reprezentuj¹cy program cieniuj¹cy.
-
 GLuint vao;
 GLuint vertexbuffer;
 GLuint vertexUV;
-GLuint textureID;
+GLuint bufNormals;
+GLint tex0;
+
+//Procedura obs³ugi klawiatury
+void key_callback(GLFWwindow* window, int key,
+	int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		if (key == GLFW_KEY_LEFT) speed_y = -3.14;
+		if (key == GLFW_KEY_RIGHT) speed_y = 3.14;
+		if (key == GLFW_KEY_UP) speed_x = -3.14;
+		if (key == GLFW_KEY_DOWN) speed_x = 3.14;
+	}
+
+
+	if (action == GLFW_RELEASE) {
+		if (key == GLFW_KEY_LEFT) speed_y = 0;
+		if (key == GLFW_KEY_RIGHT) speed_y = 0;
+		if (key == GLFW_KEY_UP) speed_x = 0;
+		if (key == GLFW_KEY_DOWN) speed_x = 0;
+	}
+}
 
 //Procedura obs³ugi b³êdów
 void error_callback(int error, const char* description) {
@@ -55,30 +79,74 @@ void assignVBOtoAttribute(ShaderProgram *shaderProgram, char* attributeName, GLu
 	glVertexAttribPointer(location, vertexSize, GL_FLOAT, GL_FALSE, 0, NULL); //Dane do slotu location maj¹ byæ brane z aktywnego VBO
 }
 
+GLuint readTexture(char* filename) {
+	GLuint tex;
+	glActiveTexture(GL_TEXTURE0);
+	//Wczytanie do pamiêci komputera
+	std::vector<unsigned char> image; //Alokuj wektor do wczytania obrazka
+	unsigned width, height; //Zmienne do których wczytamy wymiary obrazka
+							//Wczytaj obrazek
+	unsigned error = lodepng::decode(image, width, height, filename);
+	//Import do pamiêci karty graficznej
+	glGenTextures(1, &tex); //Zainicjuj jeden uchwyt
+	glBindTexture(GL_TEXTURE_2D, tex); //Uaktywnij uchwyt
+									   //Wczytaj obrazek do pamiêci KG skojarzonej z uchwytem
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, (unsigned char*)image.data());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	return tex;
+}
+
 //Procedura inicjuj¹ca
 void initOpenGLProgram(GLFWwindow* window) {
 	//************Tutaj umieszczaj kod, który nale¿y wykonaæ raz, na pocz¹tku programu************
+	
 	glClearColor(0, 0, 0, 1); //Czyœæ ekran na czarno
 	glEnable(GL_DEPTH_TEST); //W³¹cz u¿ywanie Z-Bufora
+	glEnable(GL_TEXTURE_2D);
 
-	/*
-	glEnable(GL_LIGHTING); //W³¹cz tryb cieniowania
-	glEnable(GL_LIGHT0); //W³¹cz domyslne œwiat³o
-	glEnable(GL_COLOR_MATERIAL); //glColor3d ma modyfikowaæ w³asnoœci materia³u	*/
+	glfwSetKeyCallback(window, key_callback); //Zarejestruj procedurê obs³ugi klawiatury
 
 	shaderProgram = new ShaderProgram("vshader.txt", NULL, "fshader.txt"); //Wczytaj program cieniuj¹cy 
 	
+	tex0 = readTexture("example2.png");
 }
+
+//Zwolnienie zasobów zajêtych przez program
+void freeOpenGLProgram() {
+	delete shaderProgram; //Usuniêcie programu cieniuj¹cego
+
+	glDeleteVertexArrays(1, &vao); //Usuniêcie vao
+	glDeleteBuffers(1, &vertexbuffer); //Usuniêcie VBO z wierzcho³kami
+	glDeleteBuffers(1, &vertexUV); //Usuniêcie VBO z kolorami
+	glDeleteBuffers(1, &bufNormals); //Usuniêcie VBO z wektorami normalnymi
+
+}
+
 void drawObject(Models::Model model, ShaderProgram *shaderProgram, mat4 mV, mat4 mM, mat4 mP) {
+	
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("P"), 1, false, glm::value_ptr(mP));
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("V"), 1, false, glm::value_ptr(mV));
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("M"), 1, false, glm::value_ptr(mM));
+	glUniform4f(shaderProgram->getUniformLocation("lightPos0"), 0, 0, -5, 1); //Przekazanie wspó³rzêdnych Ÿród³a œwiat³a do zmiennej jednorodnej lightPos0
+	
 
+	glUniform1i(shaderProgram->getUniformLocation("myTextureSampler"), 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex0);
+
+
+	//glVertexAttribPointer(locTex, model.vertices.size()*sizeof(glm::vec2), GL_FLOAT, GL_FALSE,0,NULL);
+	
 	//*****Przygotowanie do rysowania pojedynczego obiektu*******
+
+	//Zmienic na dodawanie do obiektu, a nie pojedynczego rysowania. VBO i VAO
+
 	//Zbuduj VBO z danymi obiektu do narysowania
-	vertexbuffer = makeBuffer(model.convert3(model.vertices), model.vertices.size(), sizeof(float) * 3); //VBO ze wspó³rzêdnymi wierzcho³ków
-	vertexUV = makeBuffer(model.convert2(model.uvs), model.vertices.size(), sizeof(float)*2);//VBO z UV
-	//bufNormals = makeBuffer(normals, vertexCount, sizeof(float) * 4);//VBO z wektorami normalnymi wierzcho³ków
+	vertexbuffer = makeBuffer(model.convert3(model.vertices), model.vertices.size(), sizeof(glm::vec3)); //VBO ze wspó³rzêdnymi wierzcho³ków
+	vertexUV = makeBuffer(model.convert2(model.uvs), model.uvs.size(), sizeof(glm::vec2));//VBO z UV
+	bufNormals = makeBuffer(model.convert3(model.normals), model.normals.size(), sizeof(glm::vec3));//VBO z wektorami normalnymi wierzcho³ków
 
 	//Zbuduj VAO wi¹¿¹cy atrybuty z konkretnymi VBO
 	glGenVertexArrays(1, &vao); //Wygeneruj uchwyt na VAO i zapisz go do zmiennej globalnej
@@ -87,26 +155,32 @@ void drawObject(Models::Model model, ShaderProgram *shaderProgram, mat4 mV, mat4
 
 	assignVBOtoAttribute(shaderProgram, "vertex", vertexbuffer, 3); //"vertex" odnosi siê do deklaracji "in vec4 vertex;" w vertex shaderze
 	assignVBOtoAttribute(shaderProgram, "vertexUV", vertexUV, 2); //"color" odnosi siê do deklaracji "in vec4 color;" w vertex shaderze
+	assignVBOtoAttribute(shaderProgram, "normal", bufNormals, 3); //"color" odnosi siê do deklaracji "in vec4 color;" w vertex shaderze
 
 	//Narysowanie obiektu
 	glDrawArrays(GL_TRIANGLES, 0, model.vertices.size());
-	//vertexbuffer = makeBuffer(&model.vertices, model.vertices.size(), sizeof(glm::vec3)); //VBO ze wspó³rzêdnymi wierzcho³ków
-	//model.drawSolid();
+
+	glBindVertexArray(0);
 	//glDisableVertexAttribArray(0);
 }
 
 //Procedura rysuj¹ca zawartoœæ sceny
-void drawScene(GLFWwindow* window) {
+void drawScene(GLFWwindow* window, float angle_x, float angle_y) {
 	//************Tutaj umieszczaj kod rysuj¹cy obraz******************l
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Wykonaj czyszczenie bufora kolorów
 
-	glm::mat4 M = glm::mat4(1.0f);
-
 	glm::mat4 V = glm::lookAt( //Wylicz macierz widoku
 		glm::vec3(0.0f, 0.0f, -10.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 2.0f, 0.0f),
 		glm::vec3(0.0f, 10.0f, 0.0f));
+
+	//Wylicz macierz modelu rysowanego obiektu
+	glm::mat4 M = glm::mat4(1.0f);
+	M = glm::rotate(M, angle_x, glm::vec3(1, 0, 0));
+	M = glm::rotate(M, angle_y, glm::vec3(0, 1, 0));
+
+	
 
 	glm::mat4 P = glm::perspective(50 * 3.14f / 180, 1.0f, 1.0f, 50.0f); //Wylicz macierz rzutowania
 
@@ -118,7 +192,14 @@ void drawScene(GLFWwindow* window) {
 
 	drawObject(myModel, shaderProgram, V, M, P);
 
-	//glDisableVertexAttribArray(0);
+	M = glm::scale(M, glm::vec3(0.5f));
+	M = glm::translate(M, glm::vec3(4.0f, 0.0f, 0.0f));
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(glm::value_ptr(V*M));
+
+	// drawObject(cube, "example.bmp", shaderProgram, V, M, P);
+
+	glDisableVertexAttribArray(0);
 	//Przerzuæ tylny bufor na przedni
 	glfwSwapBuffers(window);
 
@@ -145,6 +226,9 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
+	float angle_x = 0; //K¹t obrotu obiektu
+	float angle_y = 0; //K¹t obrotu obiektu
+
 	glfwMakeContextCurrent(window); //Od tego momentu kontekst okna staje siê aktywny i polecenia OpenGL bêd¹ dotyczyæ w³aœnie jego.
 	glfwSwapInterval(1); //Czekaj na 1 powrót plamki przed pokazaniem ukrytego bufora
 
@@ -160,10 +244,14 @@ int main(void)
 					//G³ówna pêtla
 	while (!glfwWindowShouldClose(window)) //Tak d³ugo jak okno nie powinno zostaæ zamkniête
 	{
+		angle_x += speed_x*glfwGetTime(); //Zwiêksz k¹t o prêdkoœæ k¹tow¹ razy czas jaki up³yn¹³ od poprzedniej klatki
+		angle_y += speed_y*glfwGetTime(); //Zwiêksz k¹t o prêdkoœæ k¹tow¹ razy czas jaki up³yn¹³ od poprzedniej klatki
 		glfwSetTime(0); //Wyzeruj licznik czasu
-		drawScene(window); //Wykonaj procedurê rysuj¹c¹
+		drawScene(window, angle_x, angle_y); //Wykonaj procedurê rysuj¹c¹
 		glfwPollEvents(); //Wykonaj procedury callback w zaleznoœci od zdarzeñ jakie zasz³y.
 	}
+
+	freeOpenGLProgram();
 
 	glfwDestroyWindow(window); //Usuñ kontekst OpenGL i okno
 	glfwTerminate(); //Zwolnij zasoby zajête przez GLFW
