@@ -12,6 +12,7 @@
 using namespace std;
 
 namespace Models {
+
 	Model model;
 
 	Model::Model()
@@ -24,6 +25,11 @@ namespace Models {
 	void Model::init(const char* nazwaModelu) {
 		this->loadModel(nazwaModelu, vertices, uvs, normals);
 	}
+
+	void Model::setValue(GLuint value,GLuint &valueToSet) {
+		valueToSet=value;
+	};
+
 
 	void Model::loadModel(const char * nazwaModelu, std::vector <glm::vec3> & out_vertices,
 		std::vector < glm::vec2 > & out_uvs,

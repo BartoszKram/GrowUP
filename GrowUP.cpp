@@ -30,10 +30,10 @@ float speed_y = 0; // [radiany/s]
 //Uchwyty na shadery
 ShaderProgram *shaderProgram; //WskaŸnik na obiekt reprezentuj¹cy program cieniuj¹cy.
 GLuint vao;
-GLuint vertexbuffer;
-GLuint vertexUV;
-GLuint bufNormals;
+
 GLint tex0;
+
+
 
 //Procedura obs³ugi klawiatury
 void key_callback(GLFWwindow* window, int key,
@@ -98,70 +98,93 @@ GLuint readTexture(char* filename) {
 	return tex;
 }
 
+void loadObjectVBO(Models::Model &model) {
+	//Zbuduj VBO z danymi obiektu do narysowania
+	GLuint vb, vuv, vn;
+	GLuint vao;
+	//vb = makeBuffer(model.convert3(model.vertices), model.vertices.size(), sizeof(glm::vec3)); //VBO ze wspó³rzêdnymi wierzcho³ków
+	//vuv = makeBuffer(model.convert2(model.uvs), model.uvs.size(), sizeof(glm::vec2));//VBO z UV
+	//vn = makeBuffer(model.convert3(model.normals), model.normals.size(), sizeof(glm::vec3));//VBO z wektorami normalnymi wierzcho³ków
+
+	glGenVertexArrays(1, &vao); //Wygeneruj uchwyt na VAO i zapisz go do zmiennej globalnej
+	glBindVertexArray(vao); //Uaktywnij nowo utworzony VAO
+	
+	glGenBuffers(1, &vb);
+	glBindBuffer(GL_ARRAY_BUFFER, vb);
+	glBufferData(GL_ARRAY_BUFFER, model.vertices.size() * sizeof(glm::vec3), &model.vertices.front(), GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &vuv);
+	glBindBuffer(GL_ARRAY_BUFFER, vuv);
+	glBufferData(GL_ARRAY_BUFFER, model.uvs.size() * sizeof(glm::vec2), &model.uvs.front(), GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(1);
+
+	glGenBuffers(1, &vn);
+	glBindBuffer(GL_ARRAY_BUFFER, vn);
+	glBufferData(GL_ARRAY_BUFFER, model.normals.size() * sizeof(glm::vec3), &model.normals.front(), GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(2);
+
+	model.setValue(vao,model.objectVao);
+	model.setValue(vb, model.vertexbuffer);
+	model.setValue(vuv, model.vertexUV);
+	model.setValue(vn, model.bufNormals);
+
+//	assignVBOtoAttribute(shaderProgram, "vertex", vb, 3); //"vertex" odnosi siê do deklaracji "in vec4 vertex;" w vertex shaderze
+//	assignVBOtoAttribute(shaderProgram, "vertexUV", vuv, 2); //"vertexUV" odnosi siê do deklaracji "in vec2 vertexUV;" w vertex shaderze
+//	assignVBOtoAttribute(shaderProgram, "normal", vn, 3); //"bufNormals" odnosi siê do deklaracji "in vec3 normal;" w vertex shaderze
+}
+
 //Procedura inicjuj¹ca
 void initOpenGLProgram(GLFWwindow* window) {
 	//************Tutaj umieszczaj kod, który nale¿y wykonaæ raz, na pocz¹tku programu************
 	
-	glClearColor(0, 0, 0, 1); //Czyœæ ekran na czarno
+	glClearColor(0, 0, 0.5, 1); //Czyœæ ekran na czarno
 	glEnable(GL_DEPTH_TEST); //W³¹cz u¿ywanie Z-Bufora
-	glEnable(GL_TEXTURE_2D);
-
+	
 	glfwSetKeyCallback(window, key_callback); //Zarejestruj procedurê obs³ugi klawiatury
 
 	shaderProgram = new ShaderProgram("vshader.txt", NULL, "fshader.txt"); //Wczytaj program cieniuj¹cy 
 	
+	loadObjectVBO(myModel);
+	loadObjectVBO(cube);
 	tex0 = readTexture("example2.png");
 }
+
+
 
 //Zwolnienie zasobów zajêtych przez program
 void freeOpenGLProgram() {
 	delete shaderProgram; //Usuniêcie programu cieniuj¹cego
-
-	glDeleteVertexArrays(1, &vao); //Usuniêcie vao
-	glDeleteBuffers(1, &vertexbuffer); //Usuniêcie VBO z wierzcho³kami
-	glDeleteBuffers(1, &vertexUV); //Usuniêcie VBO z kolorami
-	glDeleteBuffers(1, &bufNormals); //Usuniêcie VBO z wektorami normalnymi
-
 }
 
 void drawObject(Models::Model model, ShaderProgram *shaderProgram, mat4 mV, mat4 mM, mat4 mP) {
 	
+	shaderProgram->use();
+
+	//1.Aktualizacja uniformów
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("P"), 1, false, glm::value_ptr(mP));
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("V"), 1, false, glm::value_ptr(mV));
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("M"), 1, false, glm::value_ptr(mM));
 	glUniform4f(shaderProgram->getUniformLocation("lightPos0"), 0, 0, -5, 1); //Przekazanie wspó³rzêdnych Ÿród³a œwiat³a do zmiennej jednorodnej lightPos0
 	
-
 	glUniform1i(shaderProgram->getUniformLocation("myTextureSampler"), 0);
+
+	//2.Bindowanie tekstury
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex0);
-
-
 	//glVertexAttribPointer(locTex, model.vertices.size()*sizeof(glm::vec2), GL_FLOAT, GL_FALSE,0,NULL);
 	
 	//*****Przygotowanie do rysowania pojedynczego obiektu*******
 
-	//Zmienic na dodawanie do obiektu, a nie pojedynczego rysowania. VBO i VAO
-
-	//Zbuduj VBO z danymi obiektu do narysowania
-	vertexbuffer = makeBuffer(model.convert3(model.vertices), model.vertices.size(), sizeof(glm::vec3)); //VBO ze wspó³rzêdnymi wierzcho³ków
-	vertexUV = makeBuffer(model.convert2(model.uvs), model.uvs.size(), sizeof(glm::vec2));//VBO z UV
-	bufNormals = makeBuffer(model.convert3(model.normals), model.normals.size(), sizeof(glm::vec3));//VBO z wektorami normalnymi wierzcho³ków
-
-	//Zbuduj VAO wi¹¿¹cy atrybuty z konkretnymi VBO
-	glGenVertexArrays(1, &vao); //Wygeneruj uchwyt na VAO i zapisz go do zmiennej globalnej
-
-	glBindVertexArray(vao); //Uaktywnij nowo utworzony VAO
-
-	assignVBOtoAttribute(shaderProgram, "vertex", vertexbuffer, 3); //"vertex" odnosi siê do deklaracji "in vec4 vertex;" w vertex shaderze
-	assignVBOtoAttribute(shaderProgram, "vertexUV", vertexUV, 2); //"color" odnosi siê do deklaracji "in vec4 color;" w vertex shaderze
-	assignVBOtoAttribute(shaderProgram, "normal", bufNormals, 3); //"color" odnosi siê do deklaracji "in vec4 color;" w vertex shaderze
-
-	//Narysowanie obiektu
-	glDrawArrays(GL_TRIANGLES, 0, model.vertices.size());
+	//3.Bindowanie Vao
+	glBindVertexArray(model.objectVao);
+	//4.Narysowanie obiektu
+	glDrawArrays(GL_TRIANGLES, 0,model.vertices.size());
 
 	glBindVertexArray(0);
-	//glDisableVertexAttribArray(0);
 }
 
 //Procedura rysuj¹ca zawartoœæ sceny
@@ -197,7 +220,7 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(glm::value_ptr(V*M));
 
-	// drawObject(cube, "example.bmp", shaderProgram, V, M, P);
+	drawObject(cube,shaderProgram, V, M, P);
 
 	glDisableVertexAttribArray(0);
 	//Przerzuæ tylny bufor na przedni

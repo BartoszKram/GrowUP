@@ -27,6 +27,11 @@ namespace Models {
 		void drawSolid();
 		float* convert3(vector<glm::vec3> wektor);
 		float* convert2(vector<glm::vec2> wektor);
+		GLuint objectVao;
+		GLuint vertexbuffer;
+		GLuint vertexUV;
+		GLuint bufNormals;
+		void setValue(GLuint value,GLuint &valueToSet);
 		void loadModel(const char * nazwaModelu, std::vector < glm::vec3 > & out_vertices,
 			std::vector < glm::vec2 > & out_uvs,
 			std::vector < glm::vec3 > & out_normals);
