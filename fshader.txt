@@ -9,29 +9,28 @@ in vec4 vL; //interpolowany wektor do zrodla swiatla w przestrzeni oka
 
 // Ouput data
 out vec4 pixelColor;
-out vec4 out_normals;
 
 // Values that stay constant for the whole mesh.
 uniform sampler2D tex0;
 
 void main(){
-	vec4 mN=normalize(vN); //normalizuj interpolowany wektor normalny w przestrzeni oka
+vec4 mN=normalize(vN); //normalizuj interpolowany wektor normalny w przestrzeni oka
 	vec4 mL=normalize(vL); //normalizuj interpolowany wektor do obserwatora w przestrzeni oka
 	vec4 mV=normalize(vV); //normalizuj interpolowany wektor do zrodla swiatla w przestrzeni oka
 	vec4 mR=reflect(-mL,mN); //oblicz wektor odbity w przestrzeni oka
 
-	vec4 Ma=vec4(0,0,0,1); //Kolor materialu dla swiatla otoczenia
-	vec4 La=vec4(0,0,1,1); //Kolor swiatla otoczenia
-	
-	vec4 Md = texture(tex0, UV); // diffuse
+	vec4 Ma=vec4(0,0,0,0); //Kolor materialu dla swiatla otoczenia
+	vec4 La=vec4(0,0,0,0); //Kolor swiatla otoczenia
+
+	vec4 Md=texture(tex0,UV); //Kolor materialu dla swiatla rozproszonego
 	vec4 Ld=vec4(1,1,1,1); //Kolor swiatla rozpraszanego
+
 	vec4 Ms=vec4(1,1,1,1); //Kolor materialu dla swiatla odbitego
-	Ms = vec4(1,1,1,1);
-	vec4 Ls=vec4(1,1,1,1); //Kolor swiatla odbijanego
+	vec4 Ls=(3*texture(tex0,UV)+vec4(1,1,1,1))/4; //Kolor swiatla odbijanego
 	float shininess=50; //Polyskliwosc materialu
 
 	float nl=max(0,dot(mN,mL)); //Oblicz czlon Lamberta
 	float rv=pow(max(0,dot(mN,mL)),shininess); //Oblicz czlon Phonga
 
 	pixelColor=Ma*La+Md*Ld*nl+Ms*Ls*rv; //Oblicz model oswietlenia i zwroc jako kolor piksela
-}
+	}
