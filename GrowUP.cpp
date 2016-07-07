@@ -23,6 +23,7 @@ using namespace glm;
 Models::Model myModel("RoboDay.obj");
 Models::Model cube("cube.obj");
 Models::Model ksiazka("Modele/Ksiazka.obj");
+Models::Model dolar("Modele/Banknot.obj");
 
 
 float cameraSpeed_x = 0; // [radiany/s]
@@ -32,6 +33,7 @@ float cameraSpeed_y = 0; // [radiany/s]
 ShaderProgram *shaderProgram; //WskaŸnik na obiekt reprezentuj¹cy program cieniuj¹cy.
 GLint tex0;
 GLint texKsiazka;
+GLint texDolar;
 
 
 
@@ -136,6 +138,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	//matrix = glm::scale(matrix, vec3(1, 1, 2));
 	//matrix = glm::translate(matrix, vec3(-2, 0, 0));
 	loadObjectVBO(ksiazka, matrix);
+	loadObjectVBO(dolar, matrix);
 
 	//matrix = glm::rotate(matrix, 10.0f, glm::vec3(0,1,0));
 	//matrix = glm::translate(matrix, glm::vec3(2.0f, 0.0f, 0.0f));
@@ -144,6 +147,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	//Czêœæ wczytuj¹ca tekstury
 	tex0 = readTexture("example2.png");
 	texKsiazka = readTexture("Tekstury/Ksiazka.png");
+	texDolar = readTexture("Tekstury/Dolar.png");
 }
 
 
@@ -176,10 +180,10 @@ void drawObject(Models::Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 
 	//2.Bindowanie tekstury
 	glUniform1i(shaderProgram->getUniformLocation("myTextureSampler"), 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texKsiazka);
+	glBindTexture(GL_TEXTURE_2D, texDolar);
 	
 	//3.Bindowanie Vao
-	glBindVertexArray(2);
+	glBindVertexArray(model.objectVao);
 
 	//4.Narysowanie obiektu
 	
@@ -204,7 +208,9 @@ void drawScene(GLFWwindow* window, float camera_x, float camera_y) {
 	//drawObject(myModel, shaderProgram, V, P, camera_x, camera_y);
 	//drawObject(cube, shaderProgram, V, P);
 
-	drawObject(ksiazka, shaderProgram,V,P,camera_x,camera_y);
+	//drawObject(ksiazka, shaderProgram,V,P,camera_x,camera_y);
+	drawObject(dolar, shaderProgram, V, P, camera_x, camera_y);
+
 
 	glDisableVertexAttribArray(0);
 	//Przerzuæ tylny bufor na przedni
