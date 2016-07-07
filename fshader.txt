@@ -22,13 +22,11 @@ void main(){
 
 	vec4 Ma=vec4(0,0,0,1); //Kolor materialu dla swiatla otoczenia
 	vec4 La=vec4(0,0,1,1); //Kolor swiatla otoczenia
-	//vec4 Md=iC; //Kolor materialu dla swiatla rozproszonego
+	
 	vec4 Md = texture(tex0, UV); // diffuse
 	vec4 Ld=vec4(1,1,1,1); //Kolor swiatla rozpraszanego
 	vec4 Ms=vec4(1,1,1,1); //Kolor materialu dla swiatla odbitego
-	//Ms=texture(textureMap1, iTexCoord); // specular
 	Ms = vec4(1,1,1,1);
-	//Md=((3*texture(textureMap0, iTexCoord)+1*texture(textureMap1, iTexCoord2))/4);
 	vec4 Ls=vec4(1,1,1,1); //Kolor swiatla odbijanego
 	float shininess=50; //Polyskliwosc materialu
 

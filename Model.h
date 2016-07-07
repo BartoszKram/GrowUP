@@ -18,19 +18,23 @@ namespace Models {
 	class Model
 	{
 	public:
+		//Pola
 		vector<glm::vec3> vertices;
 		vector<glm::vec2> uvs;
 		vector<glm::vec3> normals;
+		glm::mat4 M;
+		GLuint objectVao;
+		GLuint vertexbuffer;
+		GLuint vertexUV;
+		GLuint bufNormals;
+
+		//Metody
 		Model();
 		Model(const char * nazwaModelu);
 		void init(const char* nazwaModelu);
 		void drawSolid();
 		float* convert3(vector<glm::vec3> wektor);
 		float* convert2(vector<glm::vec2> wektor);
-		GLuint objectVao;
-		GLuint vertexbuffer;
-		GLuint vertexUV;
-		GLuint bufNormals;
 		void setValue(GLuint value,GLuint &valueToSet);
 		void loadModel(const char * nazwaModelu, std::vector < glm::vec3 > & out_vertices,
 			std::vector < glm::vec2 > & out_uvs,
