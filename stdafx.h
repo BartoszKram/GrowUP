@@ -11,6 +11,7 @@
 #include <tchar.h>
 #include <stdlib.h>
 #include <vector>
+#include <cmath>
 
 #include "GL/glew.h"
 #include "GL/glut.h"

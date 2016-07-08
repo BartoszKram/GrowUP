@@ -8,11 +8,11 @@ Models::Model cube("cube.obj");
 Models::Model ksiazka("Modele/Ksiazka.obj");
 Models::Model dolar("Modele/Banknot.obj");
 Czlowiek czlowiek;
-bool animacja = false;
 
 
 float cameraSpeed_x = 0; // [radiany/s]
 float cameraSpeed_y = 0; // [radiany/s]
+float cameraMove = 0;
 
 				   //Uchwyty na shadery
 ShaderProgram *shaderProgram; //WskaŸnik na obiekt reprezentuj¹cy program cieniuj¹cy.
@@ -30,6 +30,10 @@ void key_callback(GLFWwindow* window, int key,
 		if (key == GLFW_KEY_RIGHT) cameraSpeed_y = 3.14;
 		if (key == GLFW_KEY_UP) cameraSpeed_x = -3.14;
 		if (key == GLFW_KEY_DOWN) cameraSpeed_x = 3.14;
+		if (key == GLFW_KEY_Q) czlowiek.SetAnimacja();
+		if (key == GLFW_KEY_A) cameraMove = -3.14;
+		if (key == GLFW_KEY_D) cameraMove = 3.14;
+
 	}
 
 
@@ -38,6 +42,8 @@ void key_callback(GLFWwindow* window, int key,
 		if (key == GLFW_KEY_RIGHT) cameraSpeed_y = 0;
 		if (key == GLFW_KEY_UP) cameraSpeed_x = 0;
 		if (key == GLFW_KEY_DOWN) cameraSpeed_x = 0;
+		if (key == GLFW_KEY_A) cameraMove = 0;
+		if (key == GLFW_KEY_D) cameraMove = 0;
 	}
 }
 
@@ -155,11 +161,11 @@ void drawObject(Models::Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 
 	3. Animacje powinny byæ animacjami obracaj¹cymi ca³y obiekt.
 	*/
 
-	shaderProgram->use();
-
 	mat4 modelMatrix = model.M;
 	modelMatrix = glm::rotate(modelMatrix, rotation_x, glm::vec3(1, 0, 0));
 	modelMatrix = glm::rotate(modelMatrix, rotation_y, glm::vec3(0, 1, 0));
+
+	shaderProgram->use();
 
 	//1.Aktualizacja uniformów
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("P"), 1, false, glm::value_ptr(mP));
@@ -170,7 +176,9 @@ void drawObject(Models::Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 
 	//2.Bindowanie tekstury
 	glUniform1i(shaderProgram->getUniformLocation("myTextureSampler"), 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texDolar);
+	//glBindTexture(GL_TEXTURE_2D, texDolar);
+	glBindTexture(GL_TEXTURE_2D, texKsiazka);
+	//glBindTexture(GL_TEXTURE_2D, tex0);
 	
 	//3.Bindowanie Vao
 	glBindVertexArray(model.objectVao);
@@ -182,43 +190,43 @@ void drawObject(Models::Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 
 	glBindVertexArray(0);
 }
 
-int a;
+vec3 eye = vec3(0.0f, 5.0f, -5.0f);
 
 //Procedura rysuj¹ca zawartoœæ sceny
-void drawScene(GLFWwindow* window, float camera_x, float camera_y) {
+void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam) {
 	//************Tutaj umieszczaj kod rysuj¹cy obraz******************l
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Wykonaj czyszczenie bufora kolorów
 
-	glm::mat4 P = glm::perspective(50 * 3.14f / 180, 1.0f, 1.0f, 50.0f); //Wylicz macierz rzutowania
+	mat4 P = glm::perspective(50 * 3.14f / 180, 1.0f, 1.0f, 50.0f); //Wylicz macierz rzutowania
 
-	glm::mat4 V = glm::lookAt( //Wylicz macierz widoku
-		glm::vec3(0.0f, 0.0f, -5.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f));
+	//if (angle_x!=0)
+	eye = vec3(eye.x * cos(angle_cam) + eye.z * sin(angle_cam), eye.y, -eye.x * sin(angle_cam) + eye.z * cos(angle_cam));
+	//eye = vec3(eye.x, eye.y, eye.z+1);
 
+	mat4 V = glm::lookAt( //Wylicz macierz widoku
+		eye,
+		vec3(0.0f, 0.0f, 0.0f),
+		vec3(0.0f, 1.0f, 0.0f));
+	
+	
 	//drawObject(myModel, shaderProgram, V, P, camera_x, camera_y);
 	//drawObject(cube, shaderProgram, V, P, camera_x, camera_y);
 
-	//drawObject(ksiazka, shaderProgram,V,P,camera_x,camera_y);
+	drawObject(ksiazka, shaderProgram, V, P, angle_x, angle_y);
 	//drawObject(dolar, shaderProgram, V, P, camera_x, camera_y);
 	
-	Model model;
-	//a = 1;
-	/*if (a == 0)
-	{
-		if (animacja == true)
-		{
-			czlowiek.ZacznijAnimacje();
-		}
-		else{
-			czlowiek.ZmienStan();
-		}
-	}
-	//a = 1;*/
 
-	model = *czlowiek.GetModel(2);
-	drawObject(model, shaderProgram, V, P, camera_x, camera_y);
+	//Czlowiek
+	/*if (czlowiek.GetAnimacja() == true && !czlowiek.GetStan())
+	{
+		czlowiek.ZacznijAnimacje();
+	}
+	else{
+		czlowiek.ZmienStan();
+	}
+
+	drawObject(*czlowiek.GetAktModel(), shaderProgram, V, P, camera_x, camera_y);*/
 
 
 	glDisableVertexAttribArray(0);
@@ -250,6 +258,7 @@ int main(void)
 
 	float angle_x = 0; //K¹t obrotu kamery w osi x
 	float angle_y = 0; //K¹t obrotu kamery w osi y
+	float angle_cam = 0; //K¹t obrotu kamery wokó³ osi y
 
 	glfwMakeContextCurrent(window); //Od tego momentu kontekst okna staje siê aktywny i polecenia OpenGL bêd¹ dotyczyæ w³aœnie jego.
 	glfwSwapInterval(1); //Czekaj na 1 powrót plamki przed pokazaniem ukrytego bufora
@@ -266,16 +275,20 @@ int main(void)
 					//G³ówna pêtla
 	while (!glfwWindowShouldClose(window)) //Tak d³ugo jak okno nie powinno zostaæ zamkniête
 	{
-		angle_x += cameraSpeed_x*glfwGetTime(); //Zwiêksz k¹t o prêdkoœæ k¹tow¹ razy czas jaki up³yn¹³ od poprzedniej klatki
-		angle_y += cameraSpeed_y*glfwGetTime(); //Zwiêksz k¹t o prêdkoœæ k¹tow¹ razy czas jaki up³yn¹³ od poprzedniej klatki
-		glfwSetTime(0); //Wyzeruj licznik czasu
-		/*
-		Tu bêd¹ wykonywane wszystkie modyfikacje macierzy modeli. Pozwoli to na 
-		wykonywanie animacji na pojedynczych modelach nie ruszaj¹c innych. Obs³uga klawiszy musi byæ
-		blokowana przyk³adow¹ zmienn¹ "enable" do czasu zakoñczenia animacji. Kod bêdzie brzydki ale dzia³aj¹cy ;)
-		*/
-		drawScene(window, angle_x, angle_y); //Wykonaj procedurê rysuj¹c¹
-		glfwPollEvents(); //Wykonaj procedury callback w zaleznoœci od zdarzeñ jakie zasz³y.
+		if (glfwGetTime() > 0.01)
+		{
+			angle_cam = cameraMove * glfwGetTime();
+			angle_x += cameraSpeed_x*glfwGetTime(); //Zwiêksz k¹t o prêdkoœæ k¹tow¹ razy czas jaki up³yn¹³ od poprzedniej klatki
+			angle_y += cameraSpeed_y*glfwGetTime(); //Zwiêksz k¹t o prêdkoœæ k¹tow¹ razy czas jaki up³yn¹³ od poprzedniej klatki
+			glfwSetTime(0); //Wyzeruj licznik czasu
+			/*
+			Tu bêd¹ wykonywane wszystkie modyfikacje macierzy modeli. Pozwoli to na
+			wykonywanie animacji na pojedynczych modelach nie ruszaj¹c innych. Obs³uga klawiszy musi byæ
+			blokowana przyk³adow¹ zmienn¹ "enable" do czasu zakoñczenia animacji. Kod bêdzie brzydki ale dzia³aj¹cy ;)
+			*/
+			drawScene(window, angle_x, angle_y, angle_cam); //Wykonaj procedurê rysuj¹c¹
+			glfwPollEvents(); //Wykonaj procedury callback w zaleznoœci od zdarzeñ jakie zasz³y.
+		}
 	}
 
 	freeOpenGLProgram();

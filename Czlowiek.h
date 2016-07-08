@@ -28,9 +28,13 @@ class Czlowiek
 		void ZmienStan();
 		void ZacznijAnimacje();
 		int Getn();
+		bool GetAnimacja();
+		void SetAnimacja();
+		bool GetStan();
 	
 	private:
 		vector<Model> modele;
 		int stan;
 		int n;
+		bool animacja;
 };

@@ -35,6 +35,7 @@ void Czlowiek::ZmienStan()
 		if (this->stan >= this->n)
 		{
 			this->stan = 0;
+			this->animacja = false;
 		}
 	}
 }
@@ -55,3 +56,18 @@ int Czlowiek::Getn()
 {
 	return this->n;
 }
+
+bool Czlowiek::GetAnimacja()
+{
+	return this->animacja;
+}
+
+void Czlowiek::SetAnimacja()
+{
+	this->animacja = true;
+}
+
+bool Czlowiek::GetStan()
+{
+	return this->stan;
+}	
