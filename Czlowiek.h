@@ -23,8 +23,8 @@ class Czlowiek
 {
 	public:
 		Czlowiek();
-		Model GetModel(int n);
-		Model GetAktModel();
+		Model* GetModel(int n);
+		Model* GetAktModel();
 		void ZmienStan();
 		void ZacznijAnimacje();
 		int Getn();

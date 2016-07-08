@@ -17,14 +17,14 @@ Czlowiek::Czlowiek()
 	modele.push_back(ksiazka);
 }
 
-Model Czlowiek::GetModel(int n)
+Model* Czlowiek::GetModel(int n)
 {
-	return this->modele[n];
+	return &this->modele[n];
 }
 
-Model Czlowiek::GetAktModel()
+Model* Czlowiek::GetAktModel()
 {
-	return this->modele[this->stan];
+	return &this->modele[this->stan];
 }
 
 void Czlowiek::ZmienStan()

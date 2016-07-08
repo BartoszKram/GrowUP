@@ -84,13 +84,13 @@ void assignVBOtoAttribute(ShaderProgram *shaderProgram, char* attributeName, GLu
 	glVertexAttribPointer(location, vertexSize, GL_FLOAT, GL_FALSE, 0, NULL); //Dane do slotu location maj¹ byæ brane z aktywnego VBO
 }
 
-void loadObjectVBO(Models::Model &model,mat4 modelMatrix) {
+void loadObjectVBO(Models::Model *model,mat4 modelMatrix) {
 	//Zbuduj VBO z danymi obiektu do narysowania
 	GLuint vb, vuv, vn;
 	GLuint vao;
-	vb = makeBuffer(model.convert3(model.vertices), model.vertices.size(), sizeof(glm::vec3)); //VBO ze wspó³rzêdnymi wierzcho³ków
-	vuv = makeBuffer(model.convert2(model.uvs), model.uvs.size(), sizeof(glm::vec2));//VBO z UV
-	vn = makeBuffer(model.convert3(model.normals), model.normals.size(), sizeof(glm::vec3));//VBO z wektorami normalnymi wierzcho³ków
+	vb = makeBuffer((*model).convert3((*model).vertices), (*model).vertices.size(), sizeof(glm::vec3)); //VBO ze wspó³rzêdnymi wierzcho³ków
+	vuv = makeBuffer((*model).convert2((*model).uvs), (*model).uvs.size(), sizeof(glm::vec2));//VBO z UV
+	vn = makeBuffer((*model).convert3((*model).normals), (*model).normals.size(), sizeof(glm::vec3));//VBO z wektorami normalnymi wierzcho³ków
 	
 	glGenVertexArrays(1, &vao); //Wygeneruj uchwyt na VAO i zapisz go do zmiennej globalnej
 	glBindVertexArray(vao); //Uaktywnij nowo utworzony VAO
@@ -99,10 +99,10 @@ void loadObjectVBO(Models::Model &model,mat4 modelMatrix) {
 	assignVBOtoAttribute(shaderProgram, "vertexUV", vuv, 2); //"vertexUV" odnosi siê do deklaracji "in vec2 vertexUV;" w vertex shaderze
 	assignVBOtoAttribute(shaderProgram, "normal", vn, 3); //"bufNormals" odnosi siê do deklaracji "in vec3 normal;" w vertex shaderze
 
-	model.setValue(vao, model.objectVao);
-	model.setValue(vb, model.vertexbuffer);
-	model.setValue(vuv, model.vertexUV);
-	model.setValue(vn, model.bufNormals);
+	(*model).setValue(vao, (*model).objectVao);
+	(*model).setValue(vb, (*model).vertexbuffer);
+	(*model).setValue(vuv, (*model).vertexUV);
+	(*model).setValue(vn, (*model).bufNormals);
 }
 
 //Procedura inicjuj¹ca
@@ -118,16 +118,16 @@ void initOpenGLProgram(GLFWwindow* window) {
 
 	//Czêœæ wczytuj¹ca modele i ustawiaj¹ca je na miejscach
 	mat4 matrix = glm::mat4(1.0f);
-	loadObjectVBO(myModel,matrix);
+	loadObjectVBO(&myModel,matrix);
 
 	//matrix = glm::scale(matrix, vec3(1, 1, 2));
 	//matrix = glm::translate(matrix, vec3(-2, 0, 0));
-	loadObjectVBO(ksiazka, matrix);
-	loadObjectVBO(dolar, matrix);
+	loadObjectVBO(&ksiazka, matrix);
+	loadObjectVBO(&dolar, matrix);
 
 	//matrix = glm::rotate(matrix, 10.0f, glm::vec3(0,1,0));
 	//matrix = glm::translate(matrix, glm::vec3(2.0f, 0.0f, 0.0f));
-	loadObjectVBO(cube, matrix);
+	loadObjectVBO(&cube, matrix);
 
 	for (int i = 0; i < czlowiek.Getn(); i++)
 	{
@@ -217,7 +217,7 @@ void drawScene(GLFWwindow* window, float camera_x, float camera_y) {
 	}
 	//a = 1;*/
 
-	model = czlowiek.GetModel(0);
+	model = *czlowiek.GetModel(2);
 	drawObject(model, shaderProgram, V, P, camera_x, camera_y);
 
 
