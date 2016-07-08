@@ -9,7 +9,22 @@
 
 #include <stdio.h>
 #include <tchar.h>
+#include <stdlib.h>
+#include <vector>
 
+#include "GL/glew.h"
+#include "GL/glut.h"
+#include "GLFW/glfw3.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
+#include "targetver.h"
+#include "Model.h"
+#include "Czlowiek.h"
+#include "shaderprogram.h"
+#include "lodepng.h"
 
-// TODO: reference additional headers your program requires here
+using namespace std;
+using namespace glm;
+using namespace Models;
