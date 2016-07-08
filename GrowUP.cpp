@@ -2,28 +2,13 @@
 //
 
 #include "stdafx.h"
-#include "targetver.h"
-#include "Model.h"
-#include "shaderprogram.h"
-#include "lodepng.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include "GL/glew.h"
-#include "GL/glut.h"
-#include "GLFW/glfw3.h"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-using namespace std;
-using namespace glm;
-
-
-
 
 Models::Model myModel("RoboDay.obj");
 Models::Model cube("cube.obj");
 Models::Model ksiazka("Modele/Ksiazka.obj");
 Models::Model dolar("Modele/Banknot.obj");
+Czlowiek czlowiek;
+bool animacja = false;
 
 
 float cameraSpeed_x = 0; // [radiany/s]
@@ -144,6 +129,11 @@ void initOpenGLProgram(GLFWwindow* window) {
 	//matrix = glm::translate(matrix, glm::vec3(2.0f, 0.0f, 0.0f));
 	loadObjectVBO(cube, matrix);
 
+	for (int i = 0; i < czlowiek.Getn(); i++)
+	{
+		loadObjectVBO(czlowiek.GetModel(i), matrix);
+	}
+
 	//Czêœæ wczytuj¹ca tekstury
 	tex0 = readTexture("example2.png");
 	texKsiazka = readTexture("Tekstury/Ksiazka.png");
@@ -192,6 +182,8 @@ void drawObject(Models::Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 
 	glBindVertexArray(0);
 }
 
+int a;
+
 //Procedura rysuj¹ca zawartoœæ sceny
 void drawScene(GLFWwindow* window, float camera_x, float camera_y) {
 	//************Tutaj umieszczaj kod rysuj¹cy obraz******************l
@@ -206,10 +198,27 @@ void drawScene(GLFWwindow* window, float camera_x, float camera_y) {
 		glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//drawObject(myModel, shaderProgram, V, P, camera_x, camera_y);
-	//drawObject(cube, shaderProgram, V, P);
+	//drawObject(cube, shaderProgram, V, P, camera_x, camera_y);
 
 	//drawObject(ksiazka, shaderProgram,V,P,camera_x,camera_y);
-	drawObject(dolar, shaderProgram, V, P, camera_x, camera_y);
+	//drawObject(dolar, shaderProgram, V, P, camera_x, camera_y);
+	
+	Model model;
+	//a = 1;
+	/*if (a == 0)
+	{
+		if (animacja == true)
+		{
+			czlowiek.ZacznijAnimacje();
+		}
+		else{
+			czlowiek.ZmienStan();
+		}
+	}
+	//a = 1;*/
+
+	model = czlowiek.GetModel(0);
+	drawObject(model, shaderProgram, V, P, camera_x, camera_y);
 
 
 	glDisableVertexAttribArray(0);
