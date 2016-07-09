@@ -3,12 +3,12 @@
 
 #include "stdafx.h"
 
-Models::Model myModel("RoboDay.obj");
-Models::Model cube("cube.obj");
-Models::Model ksiazka("Modele/Ksiazka.obj");
-Models::Model dolar("Modele/Banknot.obj");
-Czlowiek czlowiek;
+Model *myModel;
+Model *cube;
+Model *dolar;
+Model *ksiazka;
 
+Czlowiek *czlowiek;
 
 float cameraSpeed_x = 0; // [radiany/s]
 float cameraSpeed_y = 0; // [radiany/s]
@@ -30,7 +30,7 @@ void key_callback(GLFWwindow* window, int key,
 		if (key == GLFW_KEY_RIGHT) cameraSpeed_y = 3.14;
 		if (key == GLFW_KEY_UP) cameraSpeed_x = -3.14;
 		if (key == GLFW_KEY_DOWN) cameraSpeed_x = 3.14;
-		if (key == GLFW_KEY_Q) czlowiek.SetAnimacja();
+		if (key == GLFW_KEY_Q) czlowiek->SetAnimacja();
 		if (key == GLFW_KEY_A) cameraMove = -3.14;
 		if (key == GLFW_KEY_D) cameraMove = 3.14;
 
@@ -90,7 +90,7 @@ void assignVBOtoAttribute(ShaderProgram *shaderProgram, char* attributeName, GLu
 	glVertexAttribPointer(location, vertexSize, GL_FLOAT, GL_FALSE, 0, NULL); //Dane do slotu location maj¹ byæ brane z aktywnego VBO
 }
 
-void loadObjectVBO(Models::Model *model,mat4 modelMatrix) {
+void loadObjectVBO(Models::Model *model) {
 	//Zbuduj VBO z danymi obiektu do narysowania
 	GLuint vb, vuv, vn;
 	GLuint vao;
@@ -123,21 +123,14 @@ void initOpenGLProgram(GLFWwindow* window) {
 	shaderProgram = new ShaderProgram("vshader.txt", NULL, "fshader.txt"); //Wczytaj program cieniuj¹cy 
 
 	//Czêœæ wczytuj¹ca modele i ustawiaj¹ca je na miejscach
-	mat4 matrix = glm::mat4(1.0f);
-	loadObjectVBO(&myModel,matrix);
+	loadObjectVBO(myModel);
+	loadObjectVBO(ksiazka);
+	loadObjectVBO(dolar);
+	loadObjectVBO(cube);
 
-	//matrix = glm::scale(matrix, vec3(1, 1, 2));
-	//matrix = glm::translate(matrix, vec3(-2, 0, 0));
-	loadObjectVBO(&ksiazka, matrix);
-	loadObjectVBO(&dolar, matrix);
-
-	//matrix = glm::rotate(matrix, 10.0f, glm::vec3(0,1,0));
-	//matrix = glm::translate(matrix, glm::vec3(2.0f, 0.0f, 0.0f));
-	loadObjectVBO(&cube, matrix);
-
-	for (int i = 0; i < czlowiek.Getn(); i++)
+	for (int i = 0; i < czlowiek->Getn(); i++)
 	{
-		loadObjectVBO(czlowiek.GetModel(i), matrix);
+		loadObjectVBO(czlowiek->GetModel(i));
 	}
 
 	//Czêœæ wczytuj¹ca tekstury
@@ -162,9 +155,12 @@ void drawObject(Models::Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 
 	*/
 
 	mat4 modelMatrix = model.M;
-	modelMatrix = glm::rotate(modelMatrix, rotation_x, glm::vec3(1, 0, 0));
-	modelMatrix = glm::rotate(modelMatrix, rotation_y, glm::vec3(0, 1, 0));
-
+	modelMatrix = scale(modelMatrix, model.skalowanie);
+	modelMatrix = translate(modelMatrix, model.translacja);
+	modelMatrix = translate(modelMatrix, model.rotacja);
+	modelMatrix = rotate(modelMatrix, rotation_x, glm::vec3(1, 0, 0));
+	modelMatrix = rotate(modelMatrix, rotation_y, glm::vec3(0, 1, 0));
+	
 	shaderProgram->use();
 
 	//1.Aktualizacja uniformów
@@ -176,9 +172,7 @@ void drawObject(Models::Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 
 	//2.Bindowanie tekstury
 	glUniform1i(shaderProgram->getUniformLocation("myTextureSampler"), 0);
 	glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, texDolar);
-	glBindTexture(GL_TEXTURE_2D, texKsiazka);
-	//glBindTexture(GL_TEXTURE_2D, tex0);
+	glBindTexture(GL_TEXTURE_2D, model.texModelu);
 	
 	//3.Bindowanie Vao
 	glBindVertexArray(model.objectVao);
@@ -210,11 +204,11 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam
 		vec3(0.0f, 1.0f, 0.0f));
 	
 	
-	//drawObject(myModel, shaderProgram, V, P, camera_x, camera_y);
-	//drawObject(cube, shaderProgram, V, P, camera_x, camera_y);
+	//drawObject(*myModel, shaderProgram, V, P, angle_x, angle_y);
+	//drawObject(*cube, shaderProgram, V, P, angle_x, angle_y);
 
-	drawObject(ksiazka, shaderProgram, V, P, angle_x, angle_y);
-	//drawObject(dolar, shaderProgram, V, P, camera_x, camera_y);
+	//drawObject(*ksiazka, shaderProgram, V, P, angle_x, angle_y);
+	drawObject(*dolar, shaderProgram, V, P, angle_x, angle_y);
 	
 
 	//Czlowiek
@@ -226,7 +220,7 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam
 		czlowiek.ZmienStan();
 	}
 
-	drawObject(*czlowiek.GetAktModel(), shaderProgram, V, P, camera_x, camera_y);*/
+	drawObject(*czlowiek.GetAktModel(), shaderProgram, V, P, angle_x, angle_y);*/
 
 
 	glDisableVertexAttribArray(0);
@@ -267,6 +261,12 @@ int main(void)
 		fprintf(stderr, "Nie mo¿na zainicjowaæ GLEW.\n");
 		exit(EXIT_FAILURE);
 	}
+	
+	myModel = new Model("RoboDay.obj", "example2.png", "example2.png", 3);
+	cube = new Model("cube.obj", "example2.png", "example2.png", 3);
+	dolar = new Model("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3);
+	ksiazka = new Model("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	czlowiek = new Czlowiek();
 
 	initOpenGLProgram(window); //Operacje inicjuj¹ce
 
@@ -292,6 +292,12 @@ int main(void)
 	}
 
 	freeOpenGLProgram();
+	delete myModel;
+	delete cube;
+	delete dolar;
+	delete ksiazka;
+	delete czlowiek;
+
 
 	glfwDestroyWindow(window); //Usuñ kontekst OpenGL i okno
 	glfwTerminate(); //Zwolnij zasoby zajête przez GLFW

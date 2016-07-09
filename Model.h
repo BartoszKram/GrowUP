@@ -31,9 +31,18 @@ namespace Models {
 		GLuint vertexUV;
 		GLuint bufNormals;
 
+		GLint texModelu;
+		GLint texOdbicia;
+		int relLevel;
+
+		vec3 rotacja;
+		vec3 translacja;
+		vec3 skalowanie;
+
+
 		//Metody
-		Model();
-		Model(const char * nazwaModelu);
+		Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, int relLevel);
+		Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, int relLevel, vec3 rotacja, vec3 translacja, vec3 skalowanie);
 		void init(const char* nazwaModelu);
 		void drawSolid();
 		float* convert3(vector<vec3> wektor);
@@ -42,6 +51,7 @@ namespace Models {
 		void loadModel(const char * nazwaModelu, std::vector < vec3 > & out_vertices,
 			vector < vec2 > & out_uvs,
 			vector < vec3 > & out_normals);
+		GLuint readTexture(char* filename);
 	};
 	extern Model model;
 }

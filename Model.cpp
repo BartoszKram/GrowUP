@@ -3,15 +3,28 @@
 
 namespace Models {
 
-	Model model;
-
-	Model::Model()
+	Model::Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, int relLevel)
 	{
+		this->loadModel(nazwaModelu, vertices, uvs, normals);
+
+		this->texModelu = readTexture(texModelu);
+
+		this->texOdbicia = readTexture(texOdbicia);
+		this->relLevel = relLevel;
+
+		this->rotacja = vec3(0,0,0);
+		this->translacja = vec3(0, 0, 0);
+		this->skalowanie = vec3(1, 1, 1);
 	}
 
-	Model::Model(const char * nazwaModelu) {
-		loadModel(nazwaModelu, vertices, uvs, normals);
+	Model::Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, int relLevel, vec3 rotacja, vec3 translacja, vec3 skalowanie)
+	{
+		Model(nazwaModelu, texModelu, texOdbicia, relLevel);
+		this->rotacja = rotacja;
+		this->translacja = translacja;
+		this->skalowanie = skalowanie;
 	}
+
 
 	void Model::init(const char* nazwaModelu) {
 		this->loadModel(nazwaModelu, vertices, uvs, normals);
@@ -128,5 +141,24 @@ namespace Models {
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vec3), &vertices[0], GL_STATIC_DRAW);
 		glDrawArrays(GL_TRIANGLES, 0, this->vertices.size()); // Starting from vertex 0; 3 vertices total -> 1 triangle
 		glBindVertexArray(0);
+	}
+
+	GLuint Model::readTexture(char* filename) {
+		GLuint tex;
+		glActiveTexture(GL_TEXTURE0);
+		//Wczytanie do pamiêci komputera
+		std::vector<unsigned char> image; //Alokuj wektor do wczytania obrazka
+		unsigned width, height; //Zmienne do których wczytamy wymiary obrazka
+		//Wczytaj obrazek
+		unsigned error = lodepng::decode(image, width, height, filename);
+		//Import do pamiêci karty graficznej
+		glGenTextures(1, &tex); //Zainicjuj jeden uchwyt
+		glBindTexture(GL_TEXTURE_2D, tex); //Uaktywnij uchwyt
+		//Wczytaj obrazek do pamiêci KG skojarzonej z uchwytem
+		glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
+			GL_RGBA, GL_UNSIGNED_BYTE, (unsigned char*)image.data());
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		return tex;
 	}
 }
