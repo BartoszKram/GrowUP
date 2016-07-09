@@ -18,8 +18,8 @@ namespace Models {
 	}
 
 	Model::Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, int relLevel, vec3 rotacja, vec3 translacja, vec3 skalowanie)
+		: Model(nazwaModelu, texModelu, texOdbicia, relLevel)
 	{
-		Model(nazwaModelu, texModelu, texOdbicia, relLevel);
 		this->rotacja = rotacja;
 		this->translacja = translacja;
 		this->skalowanie = skalowanie;

@@ -25,6 +25,7 @@
 #include "Czlowiek.h"
 #include "shaderprogram.h"
 #include "lodepng.h"
+#include "Lvl.h"
 
 using namespace std;
 using namespace glm;

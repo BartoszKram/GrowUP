@@ -3,6 +3,11 @@
 
 #include "stdafx.h"
 
+Lvl *nauka;
+Lvl *praca;
+Lvl *dom;
+Lvl *alkohol;
+
 Model *myModel;
 Model *cube;
 Model *dolar;
@@ -33,6 +38,10 @@ void key_callback(GLFWwindow* window, int key,
 		if (key == GLFW_KEY_Q) czlowiek->SetAnimacja();
 		if (key == GLFW_KEY_A) cameraMove = -3.14;
 		if (key == GLFW_KEY_D) cameraMove = 3.14;
+		if (key == GLFW_KEY_Z) nauka->Inclvl();
+		if (key == GLFW_KEY_X) praca->Inclvl();
+		if (key == GLFW_KEY_C) dom->Inclvl();
+		if (key == GLFW_KEY_V) alkohol->Inclvl();
 
 	}
 
@@ -133,20 +142,303 @@ void initOpenGLProgram(GLFWwindow* window) {
 		loadObjectVBO(czlowiek->GetModel(i));
 	}
 
+	vector<Model>* modele;
+
+	for (int i = 0; i <= nauka->Getmaxlvl(); i++)
+	{
+		modele = nauka->GetModele(i);
+		for (int j=0; j < modele->size(); j++)
+		{
+			loadObjectVBO(&modele->at(j));
+		}
+	}
+
+	/*for (int i = 0; i <= praca->Getmaxlvl(); i++)
+	{
+		modele = praca->GetModele(i);
+		for (int j = 0; j < modele->size(); j++)
+		{
+			loadObjectVBO(&modele->at(j));
+		}
+	}
+
+	for (int i = 0; i <= dom->Getmaxlvl(); i++)
+	{
+		modele = dom->GetModele(i);
+		for (int j = 0; j < modele->size(); j++)
+		{
+			loadObjectVBO(&modele->at(j));
+		}
+	}
+
+	for (int i = 0; i <= alkohol->Getmaxlvl(); i++)
+	{
+		modele = alkohol->GetModele(i);
+		for (int j = 0; j < modele->size(); j++)
+		{
+			loadObjectVBO(&modele->at(j));
+		}
+	}*/
+
 	//Czêœæ wczytuj¹ca tekstury
 	tex0 = readTexture("example2.png");
 	texKsiazka = readTexture("Tekstury/Ksiazka.png");
 	texDolar = readTexture("Tekstury/Dolar.png");
 }
 
+void LoadNauka()
+{
+	vector<vector<Model>> poziomy;
+	vector<Model> modele;
+	int maxlvl = 4;
+	
+	//Poziom 0 - pusty, brak obiektu
+	poziomy.push_back(modele);
 
+	//Poziom 1 - ksiazka
+	Model ksiazka1("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	modele.push_back(ksiazka1);
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 2 - stol i ksiazka
+	modele.push_back(ksiazka1);
+	Model stol("RoboDay.obj", "example2.png", "example2.png", 3, vec3(-5,0,0), vec3(0,0,0), vec3(1,1,1));
+	modele.push_back(stol);
+
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 3 - stol i ksiazka x5 (?)
+	modele.push_back(ksiazka1);
+	Model ksiazka2("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(0, -5, 0), vec3(1, 1, 1));
+	modele.push_back(ksiazka2);
+	Model ksiazka3("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(0, 0, -5), vec3(1, 1, 1));
+	modele.push_back(ksiazka3);
+	Model ksiazka4("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(5, 0, 0), vec3(1, 1, 1));
+	modele.push_back(ksiazka4);
+	Model ksiazka5("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(0, 5, 0), vec3(1, 1, 1));
+	modele.push_back(ksiazka5);
+	modele.push_back(stol);
+
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 4 - stol i komputer
+	modele.push_back(stol);
+	Model komputer("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	modele.push_back(komputer);
+
+	poziomy.push_back(modele);
+	
+	nauka = new Lvl(poziomy, maxlvl);
+}
+
+void LoadPraca()
+{
+	vector<vector<Model>> poziomy;
+	vector<Model> modele;
+	int maxlvl = 0;
+	praca = new Lvl(poziomy, maxlvl);
+
+	/*vector<vector<Model>> poziomy;
+	vector<Model> modele;
+	int maxlvl = 4;
+
+	//Poziom 0 - pusty, brak obiektu
+	poziomy.push_back(modele);
+
+	//Poziom 1 - ksiazka
+	Model ksiazka1("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka1);
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 2 - stol i ksiazka
+	modele.push_back(ksiazka1);
+	Model stol("RoboDay.obj", "example2.png", "example2.png", 3);
+	modele.push_back(stol);
+
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 3 - stol i ksiazka x5 (?)
+	modele.push_back(ksiazka1);
+	Model ksiazka2("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka2);
+	Model ksiazka3("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka3);
+	Model ksiazka4("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka4);
+	Model ksiazka5("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka5);
+	modele.push_back(stol);
+
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 4 - stol i komputer
+	modele.push_back(stol);
+	Model komputer("RoboDay.obj", "example2.png", "example2.png", 3);
+	modele.push_back(komputer);
+
+	poziomy.push_back(modele);
+
+	nauka = new Lvl(poziomy, maxlvl);
+
+	//myModel = new Model("RoboDay.obj", "example2.png", "example2.png", 3);
+	
+	//dolar = new Model("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3);*/
+}
+
+void LoadDom()
+{
+	vector<vector<Model>> poziomy;
+	vector<Model> modele;
+	int maxlvl = 0;
+	dom = new Lvl(poziomy, maxlvl);
+
+	/*vector<vector<Model>> poziomy;
+	vector<Model> modele;
+	int maxlvl = 4;
+
+	//Poziom 0 - pusty, brak obiektu
+	poziomy.push_back(modele);
+
+	//Poziom 1 - ksiazka
+	Model ksiazka1("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka1);
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 2 - stol i ksiazka
+	modele.push_back(ksiazka1);
+	Model stol("RoboDay.obj", "example2.png", "example2.png", 3);
+	modele.push_back(stol);
+
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 3 - stol i ksiazka x5 (?)
+	modele.push_back(ksiazka1);
+	Model ksiazka2("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka2);
+	Model ksiazka3("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka3);
+	Model ksiazka4("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka4);
+	Model ksiazka5("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka5);
+	modele.push_back(stol);
+
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 4 - stol i komputer
+	modele.push_back(stol);
+	Model komputer("RoboDay.obj", "example2.png", "example2.png", 3);
+	modele.push_back(komputer);
+
+	poziomy.push_back(modele);
+
+	nauka = new Lvl(poziomy, maxlvl);*/
+
+}
+
+void LoadAlkohol()
+{
+	vector<vector<Model>> poziomy;
+	vector<Model> modele;
+	int maxlvl = 0;
+	/*
+	//Poziom 0 - pusty, brak obiektu
+	poziomy.push_back(modele);
+
+	//Poziom 1 - ksiazka
+	Model ksiazka1("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka1);
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 2 - stol i ksiazka
+	modele.push_back(ksiazka1);
+	Model stol("RoboDay.obj", "example2.png", "example2.png", 3);
+	modele.push_back(stol);
+
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 3 - stol i ksiazka x5 (?)
+	modele.push_back(ksiazka1);
+	Model ksiazka2("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka2);
+	Model ksiazka3("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka3);
+	Model ksiazka4("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka4);
+	Model ksiazka5("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	modele.push_back(ksiazka5);
+	modele.push_back(stol);
+
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 4 - stol i komputer
+	modele.push_back(stol);
+	Model komputer("RoboDay.obj", "example2.png", "example2.png", 3);
+	modele.push_back(komputer);
+
+	poziomy.push_back(modele);*/
+
+	alkohol = new Lvl(poziomy, maxlvl);
+}
+
+void LoadLvl()
+{
+	LoadNauka();
+	LoadPraca();
+	LoadDom();
+	LoadAlkohol();
+
+	myModel = new Model("RoboDay.obj", "example2.png", "example2.png", 3);
+	cube = new Model("cube.obj", "example2.png", "example2.png", 3);
+	dolar = new Model("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3);
+	ksiazka = new Model("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
+	czlowiek = new Czlowiek();
+}
+
+void DeleteLvl()
+{
+	delete nauka;
+	delete praca;
+	delete dom;
+	delete alkohol;
+	delete czlowiek;
+
+	delete myModel;
+	delete cube;
+	delete dolar;
+	delete ksiazka;
+}
 
 //Zwolnienie zasobów zajêtych przez program
 void freeOpenGLProgram() {
 	delete shaderProgram; //Usuniêcie programu cieniuj¹cego
 }
 
-void drawObject(Models::Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, float rotation_x,float rotation_y) {
+void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, float rotation_x,float rotation_y) {
 
 	/*TODO LIST
 	1. Stworzyæ modele i roz³o¿yæ je odpowiednio na siatki.
@@ -203,12 +495,23 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam
 		vec3(0.0f, 0.0f, 0.0f),
 		vec3(0.0f, 1.0f, 0.0f));
 	
+	vector<Model>* modele; //Modele z danego poziomu lvl
 	
+	//Nauka
+	modele = nauka->GetAktModele();
+	for (std::vector<Model>::iterator it = modele->begin(); it != modele->end(); ++it)
+	{
+		drawObject(*it, shaderProgram, V, P, angle_x, angle_y);
+	}
+
+
 	//drawObject(*myModel, shaderProgram, V, P, angle_x, angle_y);
+
+
 	//drawObject(*cube, shaderProgram, V, P, angle_x, angle_y);
 
 	//drawObject(*ksiazka, shaderProgram, V, P, angle_x, angle_y);
-	drawObject(*dolar, shaderProgram, V, P, angle_x, angle_y);
+	//drawObject(*dolar, shaderProgram, V, P, angle_x, angle_y);
 	
 
 	//Czlowiek
@@ -262,12 +565,9 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 	
-	myModel = new Model("RoboDay.obj", "example2.png", "example2.png", 3);
-	cube = new Model("cube.obj", "example2.png", "example2.png", 3);
-	dolar = new Model("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3);
-	ksiazka = new Model("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	czlowiek = new Czlowiek();
-
+	//Laduje modele poziomow i czlowieka
+	LoadLvl();
+	nauka->Inclvl();
 	initOpenGLProgram(window); //Operacje inicjuj¹ce
 
 	glfwSetTime(0); //Wyzeruj licznik czasu
@@ -292,12 +592,7 @@ int main(void)
 	}
 
 	freeOpenGLProgram();
-	delete myModel;
-	delete cube;
-	delete dolar;
-	delete ksiazka;
-	delete czlowiek;
-
+	DeleteLvl();
 
 	glfwDestroyWindow(window); //Usuñ kontekst OpenGL i okno
 	glfwTerminate(); //Zwolnij zasoby zajête przez GLFW
