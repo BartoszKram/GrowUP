@@ -92,8 +92,10 @@ namespace Models {
 		}
 		for (unsigned int i = 0; i < normalIndices.size(); i++) {
 			unsigned int normalIndex = normalIndices[i];
-			vec3 normal = tmp_vertices[normalIndex - 1];
-			out_normals.push_back(normal);
+			vec3 normal;
+			if (tmp_normals[normalIndex-1] != vec3(0,0,0)){
+			normal = tmp_normals[normalIndex-1];
+				out_normals.push_back(normal); }
 		}
 		if (file != NULL)
 			fclose(file);
