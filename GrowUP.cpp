@@ -196,15 +196,19 @@ void LoadNauka()
 	poziomy.push_back(modele);
 
 	//Poziom 1 - ksiazka
-	Model ksiazka1("Modele/Nauka1.obj", "Tekstury/Nauka1.png", "Tekstury/Nauka1.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
-	modele.push_back(ksiazka1);
+	Model ksiazka("Modele/Nauka1.obj", "Tekstury/Nauka1.png", "Tekstury/Nauka1.png", 3, vec3(0, 2, 1), vec3(0, 0, 0), vec3(0.45, 0.45, 0.45));
+	modele.push_back(ksiazka);
+
+	Model stol1("Modele/Nauka2.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(0, 0, 0), vec3(-1.695, 0, 0), vec3(1, 1, 1));
+	modele.push_back(stol1);
+	
 	poziomy.push_back(modele);
 
 	modele.clear();
 
 	//Poziom 2 - stol i ksiazka
-	modele.push_back(ksiazka1);
-	Model stol("Modele/Nauka2.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(-5,0,0), vec3(0,0,0), vec3(1,1,1));
+	//modele.push_back(ksiazka1);
+	Model stol("Modele/Nauka2.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(0,0,0), vec3(0,0,0), vec3(1,1,1));
 	modele.push_back(stol);
 
 	poziomy.push_back(modele);
@@ -212,8 +216,8 @@ void LoadNauka()
 	modele.clear();
 
 	//Poziom 3 - stol i ksiazka x5 (?)
-	modele.push_back(ksiazka1);
-	Model stolKsiazki("Modele/Nauka3.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(0, 0, 0), vec3(0, -5, 0), vec3(1, 1, 1));
+	//modele.push_back(ksiazka1);
+	Model stolKsiazki("Modele/Nauka3.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(stolKsiazki);
 
 	poziomy.push_back(modele);
@@ -221,7 +225,7 @@ void LoadNauka()
 	modele.clear();
 
 	//Poziom 4 - stol i komputer
-	modele.push_back(stol);
+	//modele.push_back(stol);
 	Model komputer("Modele/Nauka4.obj", "Tekstury/Nauka4.png", "Tekstury/Nauka4Ref.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(komputer);
 

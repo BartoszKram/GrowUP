@@ -1,30 +1,30 @@
-#version 330 core
+#version 330
 
-// Values that stay constant for the whole mesh.
-uniform mat4 M;
-uniform mat4 V;
+//Zmienne jednorodne
 uniform mat4 P;
+uniform mat4 V;
+uniform mat4 M;
+
 uniform vec4 lightPos0; //Wspolrzedne zrodla swiatla w przestrzeni swiata
 
-// Input vertex data, different for all executions of this shader.
-in vec3 vertex;
-in vec2 vertexUV;
-in vec3 normal; //wektor normalny w wierzcholku
+//Atrybuty
+in vec3 vertex; //wspolrzedne wierzcholka w przestrzeni modelu
+in vec2 vertexUV; //wspolrzedne teksturowania
+in vec3 normal; //wektor normalny w wierzcholku 
 
-// Output data ; will be interpolated for each fragment.
+//Zmienne interpolowane
 out vec2 UV;
 out vec4 vN; //interpolowany wektor normalny w przestrzeni oka
 out vec4 vV; //interpolowany wektor do obserwatora w przestrzeni oka
 out vec4 vL; //interpolowany wektor do zrodla swiatla w przestrzeni oka
 
-void main(){
+void main(void) {
+	gl_Position=P*V*M*vec4(vertex,1.0); //Oblicz wspolrzedne wierzchołka w przestrzeni przyciecia
 
-    // Output position of the vertex, in clip space : MVP * position
-	gl_Position =  P*V*M*vec4(vertex,1.0);
 	vN=normalize(V*M*vec4(normal,0.0)); //Oblicz i interpoluj wektor normalny w przestrzeni oka
 	vL=normalize(V*lightPos0-V*M*vec4(vertex,1.0)); //Oblicz i interpoluj wektor do zrodla swiatla w przestrzeni oka
 	vV=normalize(vec4(0,0,0,1)-V*M*vec4(vertex,1.0)); //Oblicz i interpoluj wektor do obserwatora w przestrzeni oka
 
-    // UV of the vertex.
-    UV = vertexUV;
+	//UV of the vertex
+	UV = vertexUV;
 }
