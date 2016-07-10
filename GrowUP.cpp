@@ -196,7 +196,7 @@ void LoadNauka()
 	poziomy.push_back(modele);
 
 	//Poziom 1 - ksiazka
-	Model ksiazka1("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	Model ksiazka1("Modele/Nauka1.obj", "Tekstury/Nauka1.png", "Tekstury/Nauka1.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(ksiazka1);
 	poziomy.push_back(modele);
 
@@ -204,7 +204,7 @@ void LoadNauka()
 
 	//Poziom 2 - stol i ksiazka
 	modele.push_back(ksiazka1);
-	Model stol("RoboDay.obj", "example2.png", "example2.png", 3, vec3(-5,0,0), vec3(0,0,0), vec3(1,1,1));
+	Model stol("Modele/Nauka2.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(-5,0,0), vec3(0,0,0), vec3(1,1,1));
 	modele.push_back(stol);
 
 	poziomy.push_back(modele);
@@ -213,15 +213,8 @@ void LoadNauka()
 
 	//Poziom 3 - stol i ksiazka x5 (?)
 	modele.push_back(ksiazka1);
-	Model ksiazka2("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(0, -5, 0), vec3(1, 1, 1));
-	modele.push_back(ksiazka2);
-	Model ksiazka3("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(0, 0, -5), vec3(1, 1, 1));
-	modele.push_back(ksiazka3);
-	Model ksiazka4("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(5, 0, 0), vec3(1, 1, 1));
-	modele.push_back(ksiazka4);
-	Model ksiazka5("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3, vec3(0, 0, 0), vec3(0, 5, 0), vec3(1, 1, 1));
-	modele.push_back(ksiazka5);
-	modele.push_back(stol);
+	Model stolKsiazki("Modele/Nauka3.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(0, 0, 0), vec3(0, -5, 0), vec3(1, 1, 1));
+	modele.push_back(stolKsiazki);
 
 	poziomy.push_back(modele);
 
@@ -229,7 +222,7 @@ void LoadNauka()
 
 	//Poziom 4 - stol i komputer
 	modele.push_back(stol);
-	Model komputer("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	Model komputer("Modele/Nauka4.obj", "Tekstury/Nauka4.png", "Tekstury/Nauka4Ref.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(komputer);
 
 	poziomy.push_back(modele);
