@@ -23,6 +23,7 @@ class Czlowiek
 {
 	public:
 		Czlowiek();
+		Czlowiek(vec3 rotacja, vec3 translacja, vec3 skalowanie);
 		Model* GetModel(int n);
 		Model* GetAktModel();
 		void ZmienStan();
@@ -31,10 +32,18 @@ class Czlowiek
 		bool GetAnimacja();
 		void SetAnimacja();
 		bool GetStan();
+		void SetCel(vec3 cel);
+		vec3 GetCel();
+		void Idz();
+
+		vec3 rotacja;
+		vec3 translacja;
+		vec3 skalowanie;
 	
 	private:
 		vector<Model> modele;
 		int stan;
 		int n;
 		bool animacja;
+		vec3 cel;
 };
