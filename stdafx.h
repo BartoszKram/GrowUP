@@ -7,6 +7,8 @@
 
 #include "targetver.h"
 
+#define _USE_MATH_DEFINES
+
 #include <stdio.h>
 #include <tchar.h>
 #include <stdlib.h>

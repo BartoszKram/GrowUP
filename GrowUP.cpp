@@ -3,29 +3,24 @@
 
 #include "stdafx.h"
 
+//Sciezki gry
 Lvl *nauka;
 Lvl *praca;
-Lvl *dom;
+Lvl *krzeslo;
 Lvl *alkohol;
 
-Model *myModel;
-Model *cube;
-Model *dolar;
-Model *ksiazka;
-
+//Student chodzacy po planszy
 Czlowiek *czlowiek;
 
-float cameraSpeed_x = 0; // [radiany/s]
-float cameraSpeed_y = 0; // [radiany/s]
-float cameraMove = 0;
+//vector umiejscowienia kamery
+vec3 eye = vec3(0.0f, 10.0f, 5.0f);
+
+float cameraSpeed_x = 0; // [radiany/s] obrot obiektu wokol osi x (pozniej do wywalenia)
+float cameraSpeed_y = 0; // [radiany/s] obrot obiektu wokol osi y (pozniej do wywalenia)
+float cameraMove = 0; // [radiany/s] obrot kamery z czasie gry
 
 				   //Uchwyty na shadery
 ShaderProgram *shaderProgram; //WskaŸnik na obiekt reprezentuj¹cy program cieniuj¹cy.
-GLint tex0;
-GLint texKsiazka;
-GLint texDolar;
-
-
 
 //Procedura obs³ugi klawiatury
 void key_callback(GLFWwindow* window, int key,
@@ -40,11 +35,10 @@ void key_callback(GLFWwindow* window, int key,
 		if (key == GLFW_KEY_D) cameraMove = 3.14;
 		if (key == GLFW_KEY_Z) nauka->Inclvl();
 		if (key == GLFW_KEY_X) praca->Inclvl();
-		if (key == GLFW_KEY_C) dom->Inclvl();
+		if (key == GLFW_KEY_C) krzeslo->Inclvl();
 		if (key == GLFW_KEY_V) alkohol->Inclvl();
 
 	}
-
 
 	if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_LEFT) cameraSpeed_y = 0;
@@ -59,25 +53,6 @@ void key_callback(GLFWwindow* window, int key,
 //Procedura obs³ugi b³êdów
 void error_callback(int error, const char* description) {
 	fputs(description, stderr);
-}
-
-GLuint readTexture(char* filename) {
-	GLuint tex;
-	glActiveTexture(GL_TEXTURE0);
-	//Wczytanie do pamiêci komputera
-	std::vector<unsigned char> image; //Alokuj wektor do wczytania obrazka
-	unsigned width, height; //Zmienne do których wczytamy wymiary obrazka
-							//Wczytaj obrazek
-	unsigned error = lodepng::decode(image, width, height, filename);
-	//Import do pamiêci karty graficznej
-	glGenTextures(1, &tex); //Zainicjuj jeden uchwyt
-	glBindTexture(GL_TEXTURE_2D, tex); //Uaktywnij uchwyt
-									   //Wczytaj obrazek do pamiêci KG skojarzonej z uchwytem
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, (unsigned char*)image.data());
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	return tex;
 }
 
 //Tworzy bufor VBO z tablicy
@@ -132,10 +107,6 @@ void initOpenGLProgram(GLFWwindow* window) {
 	shaderProgram = new ShaderProgram("vshader.txt", NULL, "fshader.txt"); //Wczytaj program cieniuj¹cy 
 
 	//Czêœæ wczytuj¹ca modele i ustawiaj¹ca je na miejscach
-	loadObjectVBO(myModel);
-	loadObjectVBO(ksiazka);
-	loadObjectVBO(dolar);
-	loadObjectVBO(cube);
 
 	for (int i = 0; i < czlowiek->Getn(); i++)
 	{
@@ -153,7 +124,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 		}
 	}
 
-	/*for (int i = 0; i <= praca->Getmaxlvl(); i++)
+	for (int i = 0; i <= praca->Getmaxlvl(); i++)
 	{
 		modele = praca->GetModele(i);
 		for (int j = 0; j < modele->size(); j++)
@@ -162,9 +133,9 @@ void initOpenGLProgram(GLFWwindow* window) {
 		}
 	}
 
-	for (int i = 0; i <= dom->Getmaxlvl(); i++)
+	for (int i = 0; i <= krzeslo->Getmaxlvl(); i++)
 	{
-		modele = dom->GetModele(i);
+		modele = krzeslo->GetModele(i);
 		for (int j = 0; j < modele->size(); j++)
 		{
 			loadObjectVBO(&modele->at(j));
@@ -178,14 +149,10 @@ void initOpenGLProgram(GLFWwindow* window) {
 		{
 			loadObjectVBO(&modele->at(j));
 		}
-	}*/
-
-	//Czêœæ wczytuj¹ca tekstury
-	tex0 = readTexture("example2.png");
-	texKsiazka = readTexture("Tekstury/Ksiazka.png");
-	texDolar = readTexture("Tekstury/Dolar.png");
+	}
 }
 
+//Laduje modele do sciezki nauka
 void LoadNauka()
 {
 	vector<vector<Model>> poziomy;
@@ -196,18 +163,14 @@ void LoadNauka()
 	poziomy.push_back(modele);
 
 	//Poziom 1 - ksiazka
-	Model ksiazka("Modele/Nauka1.obj", "Tekstury/Nauka1.png", "Tekstury/Nauka1.png", 3, vec3(0, 2, 1), vec3(0, 0, 0), vec3(0.45, 0.45, 0.45));
+	Model ksiazka("Modele/Nauka1.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(ksiazka);
-
-	Model stol1("Modele/Nauka2.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(0, 0, 0), vec3(-1.695, 0, 0), vec3(1, 1, 1));
-	modele.push_back(stol1);
 	
 	poziomy.push_back(modele);
 
 	modele.clear();
 
 	//Poziom 2 - stol i ksiazka
-	//modele.push_back(ksiazka1);
 	Model stol("Modele/Nauka2.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(0,0,0), vec3(0,0,0), vec3(1,1,1));
 	modele.push_back(stol);
 
@@ -216,7 +179,6 @@ void LoadNauka()
 	modele.clear();
 
 	//Poziom 3 - stol i ksiazka x5 (?)
-	//modele.push_back(ksiazka1);
 	Model stolKsiazki("Modele/Nauka3.obj", "Tekstury/Nauka23.png", "Tekstury/Nauka23Ref.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(stolKsiazki);
 
@@ -225,209 +187,142 @@ void LoadNauka()
 	modele.clear();
 
 	//Poziom 4 - stol i komputer
-	//modele.push_back(stol);
 	Model komputer("Modele/Nauka4.obj", "Tekstury/Nauka4.png", "Tekstury/Nauka4Ref.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(komputer);
 
 	poziomy.push_back(modele);
 	
-	nauka = new Lvl(poziomy, maxlvl);
+	nauka = new Lvl(poziomy, maxlvl, vec3(0,0,0), vec3(5,0,0), vec3(1,1,1));
 }
 
+//Laduje modele do sciezki praca
 void LoadPraca()
 {
 	vector<vector<Model>> poziomy;
 	vector<Model> modele;
-	int maxlvl = 0;
-	praca = new Lvl(poziomy, maxlvl);
-
-	/*vector<vector<Model>> poziomy;
-	vector<Model> modele;
-	int maxlvl = 4;
+	int maxlvl = 3;
 
 	//Poziom 0 - pusty, brak obiektu
 	poziomy.push_back(modele);
 
-	//Poziom 1 - ksiazka
-	Model ksiazka1("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka1);
-	poziomy.push_back(modele);
-
-	modele.clear();
-
-	//Poziom 2 - stol i ksiazka
-	modele.push_back(ksiazka1);
-	Model stol("RoboDay.obj", "example2.png", "example2.png", 3);
-	modele.push_back(stol);
-
-	poziomy.push_back(modele);
-
-	modele.clear();
-
-	//Poziom 3 - stol i ksiazka x5 (?)
-	modele.push_back(ksiazka1);
-	Model ksiazka2("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka2);
-	Model ksiazka3("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka3);
-	Model ksiazka4("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka4);
-	Model ksiazka5("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka5);
-	modele.push_back(stol);
-
-	poziomy.push_back(modele);
-
-	modele.clear();
-
-	//Poziom 4 - stol i komputer
-	modele.push_back(stol);
-	Model komputer("RoboDay.obj", "example2.png", "example2.png", 3);
-	modele.push_back(komputer);
-
-	poziomy.push_back(modele);
-
-	nauka = new Lvl(poziomy, maxlvl);
-
-	//myModel = new Model("RoboDay.obj", "example2.png", "example2.png", 3);
+	//Poziom 1 - Reka z banknotem
+	Model reka("Modele/Reka.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	modele.push_back(reka);
+	Model banknot("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	modele.push_back(banknot);
 	
-	//dolar = new Model("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3);*/
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 2 - praca (mac?)
+	Model mc("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	modele.push_back(mc);
+
+	poziomy.push_back(modele);
+
+	modele.clear();
+
+	//Poziom 3 - biuro
+	Model biuro("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	modele.push_back(biuro);
+
+	poziomy.push_back(modele);
+
+	praca = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-5, 0, 0), vec3(1, 1, 1));
 }
 
-void LoadDom()
+//Laduje modele do sciezki krzeslo
+void LoadKrzeslo()
 {
 	vector<vector<Model>> poziomy;
 	vector<Model> modele;
-	int maxlvl = 0;
-	dom = new Lvl(poziomy, maxlvl);
-
-	/*vector<vector<Model>> poziomy;
-	vector<Model> modele;
-	int maxlvl = 4;
+	int maxlvl = 3;
 
 	//Poziom 0 - pusty, brak obiektu
 	poziomy.push_back(modele);
 
-	//Poziom 1 - ksiazka
-	Model ksiazka1("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka1);
-	poziomy.push_back(modele);
-
-	modele.clear();
-
-	//Poziom 2 - stol i ksiazka
-	modele.push_back(ksiazka1);
-	Model stol("RoboDay.obj", "example2.png", "example2.png", 3);
-	modele.push_back(stol);
+	//Poziom 1 - taboret
+	Model taboret("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(1, 0, 0), vec3(1, 1, 1));
+	modele.push_back(taboret);
 
 	poziomy.push_back(modele);
 
 	modele.clear();
 
-	//Poziom 3 - stol i ksiazka x5 (?)
-	modele.push_back(ksiazka1);
-	Model ksiazka2("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka2);
-	Model ksiazka3("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka3);
-	Model ksiazka4("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka4);
-	Model ksiazka5("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka5);
-	modele.push_back(stol);
+	//Poziom 2 - krzeslo
+	Model krzeslo1("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	modele.push_back(krzeslo1);
 
 	poziomy.push_back(modele);
 
 	modele.clear();
 
-	//Poziom 4 - stol i komputer
-	modele.push_back(stol);
-	Model komputer("RoboDay.obj", "example2.png", "example2.png", 3);
-	modele.push_back(komputer);
+	//Poziom 3 - fotel
+	Model fotel("Modele/Fotel.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	modele.push_back(fotel);
 
 	poziomy.push_back(modele);
 
-	nauka = new Lvl(poziomy, maxlvl);*/
-
+	krzeslo = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(0, 0, -5), vec3(1, 1, 1));
 }
 
+//Laduje modele do sciezki alkohol
 void LoadAlkohol()
 {
 	vector<vector<Model>> poziomy;
 	vector<Model> modele;
-	int maxlvl = 0;
-	/*
-	//Poziom 0 - pusty, brak obiektu
-	poziomy.push_back(modele);
+	int maxlvl = 3;
 
-	//Poziom 1 - ksiazka
-	Model ksiazka1("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka1);
-	poziomy.push_back(modele);
-
-	modele.clear();
-
-	//Poziom 2 - stol i ksiazka
-	modele.push_back(ksiazka1);
-	Model stol("RoboDay.obj", "example2.png", "example2.png", 3);
-	modele.push_back(stol);
+	//Poziom 0 - pusty, brak obiektu (barek??)
+	Model barek("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	modele.push_back(barek);
 
 	poziomy.push_back(modele);
 
-	modele.clear();
-
-	//Poziom 3 - stol i ksiazka x5 (?)
-	modele.push_back(ksiazka1);
-	Model ksiazka2("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka2);
-	Model ksiazka3("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka3);
-	Model ksiazka4("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka4);
-	Model ksiazka5("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	modele.push_back(ksiazka5);
-	modele.push_back(stol);
+	//Poziom 1 - piwo + barek
+	Model piwo("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	modele.push_back(piwo);
 
 	poziomy.push_back(modele);
 
-	modele.clear();
+	//Poziom 2 - wodka + piwo + barek
+	Model wodka("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	modele.push_back(wodka);
 
-	//Poziom 4 - stol i komputer
-	modele.push_back(stol);
-	Model komputer("RoboDay.obj", "example2.png", "example2.png", 3);
-	modele.push_back(komputer);
+	poziomy.push_back(modele);
 
-	poziomy.push_back(modele);*/
+	//Poziom 3 - whisky + wodka + piwo + barek
+	Model whisky("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	modele.push_back(whisky);
 
-	alkohol = new Lvl(poziomy, maxlvl);
+	poziomy.push_back(modele);
+
+	alkohol = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-2, 0, -5), vec3(1, 1, 1));
 }
 
+//Laduje sciezki i studenta
 void LoadLvl()
 {
 	LoadNauka();
 	LoadPraca();
-	LoadDom();
+	LoadKrzeslo();
 	LoadAlkohol();
+	
+	vec3 rotacja(0, 0, 0);
+	rotacja.y = ((-1 * 360 / M_PI *(atan2(eye.z, eye.x)) / 2) + 90) / 180 * M_PI;
 
-	myModel = new Model("RoboDay.obj", "example2.png", "example2.png", 3);
-	cube = new Model("cube.obj", "example2.png", "example2.png", 3);
-	dolar = new Model("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3);
-	ksiazka = new Model("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
-	czlowiek = new Czlowiek();
+	czlowiek = new Czlowiek(rotacja, vec3(0,3.4,0), vec3(0.35,0.35,0.35));
 }
 
+//usuwa sciezki i ludzika
 void DeleteLvl()
 {
 	delete nauka;
 	delete praca;
-	delete dom;
+	delete krzeslo;
 	delete alkohol;
 	delete czlowiek;
-
-	delete myModel;
-	delete cube;
-	delete dolar;
-	delete ksiazka;
 }
 
 //Zwolnienie zasobów zajêtych przez program
@@ -435,7 +330,7 @@ void freeOpenGLProgram() {
 	delete shaderProgram; //Usuniêcie programu cieniuj¹cego
 }
 
-void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, float rotation_x,float rotation_y) {
+void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, float rotation_x,float rotation_y, vec3 rotacja, vec3 translacja, vec3 skalowanie) {
 
 	/*TODO LIST
 	1. Stworzyæ modele i roz³o¿yæ je odpowiednio na siatki.
@@ -444,11 +339,26 @@ void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, floa
 	*/
 
 	mat4 modelMatrix = model.M;
+	
+	//Transformacje lvl lub czlowieka
+	modelMatrix = scale(modelMatrix, skalowanie);
+	modelMatrix = translate(modelMatrix, translacja);
+
+	modelMatrix = rotate(modelMatrix, rotacja.x, vec3(1, 0, 0));
+	modelMatrix = rotate(modelMatrix, rotacja.y, vec3(0, 1, 0));
+	modelMatrix = rotate(modelMatrix, rotacja.z, vec3(0, 0, 1));
+
+	//Transformacje danego modelu 
 	modelMatrix = scale(modelMatrix, model.skalowanie);
 	modelMatrix = translate(modelMatrix, model.translacja);
-	modelMatrix = translate(modelMatrix, model.rotacja);
-	modelMatrix = rotate(modelMatrix, rotation_x, glm::vec3(1, 0, 0));
-	modelMatrix = rotate(modelMatrix, rotation_y, glm::vec3(0, 1, 0));
+	
+	modelMatrix = rotate(modelMatrix, model.rotacja.x, vec3(1, 0, 0));
+	modelMatrix = rotate(modelMatrix, model.rotacja.y, vec3(0, 1, 0));
+	modelMatrix = rotate(modelMatrix, model.rotacja.z, vec3(0, 0, 1));
+
+	//Rotacja wynikajaca z wcisniecia strzalek
+	modelMatrix = rotate(modelMatrix, rotation_x, vec3(1, 0, 0));
+	modelMatrix = rotate(modelMatrix, rotation_y, vec3(0, 1, 0));
 	
 	shaderProgram->use();
 
@@ -473,8 +383,6 @@ void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, floa
 	glBindVertexArray(0);
 }
 
-vec3 eye = vec3(0.0f, 5.0f, -5.0f);
-
 //Procedura rysuj¹ca zawartoœæ sceny
 void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam) {
 	//************Tutaj umieszczaj kod rysuj¹cy obraz******************l
@@ -483,9 +391,7 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam
 
 	mat4 P = glm::perspective(50 * 3.14f / 180, 1.0f, 1.0f, 50.0f); //Wylicz macierz rzutowania
 
-	//if (angle_x!=0)
 	eye = vec3(eye.x * cos(angle_cam) + eye.z * sin(angle_cam), eye.y, -eye.x * sin(angle_cam) + eye.z * cos(angle_cam));
-	//eye = vec3(eye.x, eye.y, eye.z+1);
 
 	mat4 V = glm::lookAt( //Wylicz macierz widoku
 		eye,
@@ -493,43 +399,51 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam
 		vec3(0.0f, 1.0f, 0.0f));
 	
 	vector<Model>* modele; //Modele z danego poziomu lvl
-	
+
 	//Nauka
 	modele = nauka->GetAktModele();
 	for (std::vector<Model>::iterator it = modele->begin(); it != modele->end(); ++it)
 	{
-		drawObject(*it, shaderProgram, V, P, angle_x, angle_y);
+		drawObject(*it, shaderProgram, V, P, angle_x, angle_y, nauka->rotacja, nauka->translacja, nauka->skalowanie);
 	}
 
+	//Praca
+	modele = praca->GetAktModele();
+	for (std::vector<Model>::iterator it = modele->begin(); it != modele->end(); ++it)
+	{
+		drawObject(*it, shaderProgram, V, P, angle_x, angle_y, praca->rotacja, praca->translacja, praca->skalowanie);
+	}
 
-	//drawObject(*myModel, shaderProgram, V, P, angle_x, angle_y);
+	//Krzeslo
+	modele = krzeslo->GetAktModele();
+	for (std::vector<Model>::iterator it = modele->begin(); it != modele->end(); ++it)
+	{
+		drawObject(*it, shaderProgram, V, P, angle_x, angle_y, krzeslo->rotacja, krzeslo->translacja, krzeslo->skalowanie);
+	}
 
-
-	//drawObject(*cube, shaderProgram, V, P, angle_x, angle_y);
-
-	//drawObject(*ksiazka, shaderProgram, V, P, angle_x, angle_y);
-	//drawObject(*dolar, shaderProgram, V, P, angle_x, angle_y);
+	//Alkohol
+	modele = alkohol->GetAktModele();
+	for (std::vector<Model>::iterator it = modele->begin(); it != modele->end(); ++it)
+	{
+		drawObject(*it, shaderProgram, V, P, angle_x, angle_y, alkohol->rotacja, alkohol->translacja, alkohol->skalowanie);
+	}
 	
 
 	//Czlowiek
-	/*if (czlowiek.GetAnimacja() == true && !czlowiek.GetStan())
+	if (czlowiek->GetAnimacja() == true && !czlowiek->GetStan())
 	{
-		czlowiek.ZacznijAnimacje();
+		czlowiek->ZacznijAnimacje();
 	}
 	else{
-		czlowiek.ZmienStan();
+		czlowiek->ZmienStan();
 	}
 
-	drawObject(*czlowiek.GetAktModel(), shaderProgram, V, P, angle_x, angle_y);*/
-
+	drawObject(*czlowiek->GetAktModel(), shaderProgram, V, P, angle_x, angle_y, czlowiek->rotacja, czlowiek->translacja, czlowiek->skalowanie);
 
 	glDisableVertexAttribArray(0);
 	//Przerzuæ tylny bufor na przedni
 	glfwSwapBuffers(window);
-
 }
-
-
 
 int main(void)
 {
@@ -542,7 +456,7 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	window = glfwCreateWindow(500, 500, "OpenGL", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL. 
+	window = glfwCreateWindow(900, 700, "OpenGL", NULL, NULL);  //Utwórz okno 500x500 o tytule "OpenGL" i kontekst OpenGL. 
 
 	if (!window) //Je¿eli okna nie uda³o siê utworzyæ, to zamknij program
 	{
@@ -564,11 +478,11 @@ int main(void)
 	
 	//Laduje modele poziomow i czlowieka
 	LoadLvl();
-	nauka->Inclvl();
+	
 	initOpenGLProgram(window); //Operacje inicjuj¹ce
 
 	glfwSetTime(0); //Wyzeruj licznik czasu
-
+	
 					//G³ówna pêtla
 	while (!glfwWindowShouldClose(window)) //Tak d³ugo jak okno nie powinno zostaæ zamkniête
 	{
@@ -583,7 +497,10 @@ int main(void)
 			wykonywanie animacji na pojedynczych modelach nie ruszaj¹c innych. Obs³uga klawiszy musi byæ
 			blokowana przyk³adow¹ zmienn¹ "enable" do czasu zakoñczenia animacji. Kod bêdzie brzydki ale dzia³aj¹cy ;)
 			*/
+			//czlowiek->SetCel(eye);
+			czlowiek->Idz();
 			drawScene(window, angle_x, angle_y, angle_cam); //Wykonaj procedurê rysuj¹c¹
+			
 			glfwPollEvents(); //Wykonaj procedury callback w zaleznoœci od zdarzeñ jakie zasz³y.
 		}
 	}

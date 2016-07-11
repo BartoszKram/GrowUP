@@ -21,11 +21,16 @@ using namespace Models;
 class Lvl{
 public:
 	Lvl(vector<vector<Model>> modele, int maxlvl);
+	Lvl(vector<vector<Model>> modele, int maxlvl, vec3 rotacja, vec3 translacja, vec3 skalowanie);
 	vector<Model>* GetModele(int n);
 	vector<Model>* GetAktModele();
 	int Getlvl();
 	void Inclvl();
 	int Getmaxlvl();
+	
+	vec3 rotacja;
+	vec3 translacja;
+	vec3 skalowanie;
 
 private:
 	int lvl;
