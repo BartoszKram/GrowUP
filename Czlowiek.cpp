@@ -8,16 +8,10 @@ Czlowiek::Czlowiek()
 	stan = 0;
 	n = 4;
 	Model ludzik("Modele/Ludzik.obj", "Tekstury/Czlowiek.png", "Tekstury/Czlowiek.png", 3);
-	Model myModel("RoboDay.obj", "example2.png", "example2.png", 3);
-	Model cube("cube.obj", "example2.png", "example2.png", 3);
-	Model banknot("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3);
-	Model ksiazka("Modele/Ksiazka.obj", "Tekstury/Ksiazka.png", "Tekstury/Ksiazka.png", 3);
 	modele.push_back(ludzik);
-	modele.push_back(myModel);
-	modele.push_back(cube);
-	modele.push_back(banknot);
-	modele.push_back(ksiazka);
-
+	modele.push_back(ludzik);
+	modele.push_back(ludzik);
+	modele.push_back(ludzik);
 	this->rotacja = vec3(0, 0, 0);
 	this->translacja = vec3(0, 0, 0);
 	this->skalowanie = vec3(1, 1, 1);

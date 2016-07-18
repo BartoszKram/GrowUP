@@ -12,8 +12,11 @@ Lvl *alkohol;
 //Student chodzacy po planszy
 Czlowiek *czlowiek;
 
+//SkyBox
+Model *skybox;
+
 //vector umiejscowienia kamery
-vec3 eye = vec3(0.0f, 10.0f, 5.0f);
+vec3 eye = vec3(0.0f, 5.0f, 5.0f);
 
 float cameraSpeed_x = 0; // [radiany/s] obrot obiektu wokol osi x (pozniej do wywalenia)
 float cameraSpeed_y = 0; // [radiany/s] obrot obiektu wokol osi y (pozniej do wywalenia)
@@ -21,6 +24,17 @@ float cameraMove = 0; // [radiany/s] obrot kamery z czasie gry
 
 				   //Uchwyty na shadery
 ShaderProgram *shaderProgram; //WskaŸnik na obiekt reprezentuj¹cy program cieniuj¹cy.
+
+//Wybor gracza
+const int BRAK = 0;
+const int NAUKA = 1;
+const int PRACA = 2;
+const int KRZESLO = 3;
+const int ALKOHOL = 4;
+const int CZLOWIEK = 5;
+
+int wybrany = BRAK;
+bool ifwybrany[5] = { 0 };
 
 //Procedura obs³ugi klawiatury
 void key_callback(GLFWwindow* window, int key,
@@ -37,7 +51,29 @@ void key_callback(GLFWwindow* window, int key,
 		if (key == GLFW_KEY_X) praca->Inclvl();
 		if (key == GLFW_KEY_C) krzeslo->Inclvl();
 		if (key == GLFW_KEY_V) alkohol->Inclvl();
-
+		if (wybrany == BRAK)
+		{
+			if (key == GLFW_KEY_1 && !ifwybrany[NAUKA])
+			{
+				wybrany = NAUKA;
+				ifwybrany[NAUKA] = true;
+			}
+			if (key == GLFW_KEY_2 && !ifwybrany[PRACA]) 
+			{
+				wybrany = PRACA;
+				ifwybrany[PRACA] = true;
+			}
+			if (key == GLFW_KEY_3 && !ifwybrany[KRZESLO]) 
+			{
+				wybrany = KRZESLO;
+				ifwybrany[KRZESLO] = true;
+			}
+			if (key == GLFW_KEY_4 && !ifwybrany[ALKOHOL])
+			{
+				wybrany = ALKOHOL;
+				ifwybrany[ALKOHOL] = true;
+			}
+		}
 	}
 
 	if (action == GLFW_RELEASE) {
@@ -150,6 +186,8 @@ void initOpenGLProgram(GLFWwindow* window) {
 			loadObjectVBO(&modele->at(j));
 		}
 	}
+
+	loadObjectVBO(skybox);
 }
 
 //Laduje modele do sciezki nauka
@@ -192,7 +230,7 @@ void LoadNauka()
 
 	poziomy.push_back(modele);
 	
-	nauka = new Lvl(poziomy, maxlvl, vec3(0,0,0), vec3(5,0,0), vec3(1,1,1));
+	nauka = new Lvl(poziomy, maxlvl, vec3(0,0,0), vec3(3,0,0), vec3(1,1,1));
 }
 
 //Laduje modele do sciezki praca
@@ -200,23 +238,23 @@ void LoadPraca()
 {
 	vector<vector<Model>> poziomy;
 	vector<Model> modele;
-	int maxlvl = 3;
+	int maxlvl = 4;
 
 	//Poziom 0 - pusty, brak obiektu
 	poziomy.push_back(modele);
 
 	//Poziom 1 - Reka z banknotem
-	Model reka("Modele/Reka.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	Model reka("Modele/Praca1.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(reka);
-	Model banknot("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
-	modele.push_back(banknot);
+	//Model banknot("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	//modele.push_back(banknot);
 	
 	poziomy.push_back(modele);
 
 	modele.clear();
 
 	//Poziom 2 - praca (mac?)
-	Model mc("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model mc("Modele/Praca2.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(mc);
 
 	poziomy.push_back(modele);
@@ -224,12 +262,20 @@ void LoadPraca()
 	modele.clear();
 
 	//Poziom 3 - biuro
-	Model biuro("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model biuro("Modele/Praca3.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(biuro);
 
 	poziomy.push_back(modele);
 
-	praca = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-5, 0, 0), vec3(1, 1, 1));
+	modele.clear();
+
+	//Poziom 4 - ??
+	Model qwer("Modele/Praca4.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	modele.push_back(qwer);
+
+	poziomy.push_back(modele);
+
+	praca = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-3, 0, 0), vec3(1, 1, 1));
 }
 
 //Laduje modele do sciezki krzeslo
@@ -237,13 +283,13 @@ void LoadKrzeslo()
 {
 	vector<vector<Model>> poziomy;
 	vector<Model> modele;
-	int maxlvl = 3;
+	int maxlvl = 4;
 
 	//Poziom 0 - pusty, brak obiektu
 	poziomy.push_back(modele);
 
 	//Poziom 1 - taboret
-	Model taboret("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(1, 0, 0), vec3(1, 1, 1));
+	Model taboret("Modele/Krzeslo1.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(1, 0, 0), vec3(1, 1, 1));
 	modele.push_back(taboret);
 
 	poziomy.push_back(modele);
@@ -251,7 +297,7 @@ void LoadKrzeslo()
 	modele.clear();
 
 	//Poziom 2 - krzeslo
-	Model krzeslo1("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model krzeslo1("Modele/Krzeslo2.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(krzeslo1);
 
 	poziomy.push_back(modele);
@@ -259,12 +305,20 @@ void LoadKrzeslo()
 	modele.clear();
 
 	//Poziom 3 - fotel
-	Model fotel("Modele/Fotel.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	Model fotel("Modele/Krzeslo3.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(fotel);
 
 	poziomy.push_back(modele);
 
-	krzeslo = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(0, 0, -5), vec3(1, 1, 1));
+	modele.clear();
+
+	//Poziom 3 - fotel
+	Model asdf("Modele/Krzeslo4.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	modele.push_back(asdf);
+
+	poziomy.push_back(modele);
+
+	krzeslo = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(0, 0, -3), vec3(1, 1, 1));
 }
 
 //Laduje modele do sciezki alkohol
@@ -275,44 +329,50 @@ void LoadAlkohol()
 	int maxlvl = 3;
 
 	//Poziom 0 - pusty, brak obiektu (barek??)
-	Model barek("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model barek("Modele/Alkohol1.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(barek);
 
 	poziomy.push_back(modele);
 
 	//Poziom 1 - piwo + barek
-	Model piwo("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model piwo("Modele/Alkohol2.obj", "Tekstury/Alkohol2.png", "Tekstury/Alkohol2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(piwo);
 
 	poziomy.push_back(modele);
 
 	//Poziom 2 - wodka + piwo + barek
-	Model wodka("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model wodka("Modele/Alkohol3.obj", "Tekstury/Alkohol3.png", "Tekstury/Alkohol3.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(wodka);
 
 	poziomy.push_back(modele);
 
 	//Poziom 3 - whisky + wodka + piwo + barek
-	Model whisky("RoboDay.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model whisky("Modele/Alkohol4.obj", "Tekstury/Alkohol4.png", "Tekstury/Alkohol4.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(whisky);
 
 	poziomy.push_back(modele);
 
-	alkohol = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-2, 0, -5), vec3(1, 1, 1));
+	alkohol = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-2, 0, -3), vec3(1, 1, 1));
 }
 
 //Laduje sciezki i studenta
 void LoadLvl()
 {
+	cout << "nauka" << endl;
 	LoadNauka();
+	cout << "praca" << endl;
 	LoadPraca();
+	cout << "krzeslo" << endl;
 	LoadKrzeslo();
+	cout << "alkohol" << endl;
 	LoadAlkohol();
-	
+	cout << "czlowiek" << endl;
 	vec3 rotacja(0, 0, 0);
 	rotacja.y = ((-1 * 360 / M_PI *(atan2(eye.z, eye.x)) / 2) + 90) / 180 * M_PI;
 
-	czlowiek = new Czlowiek(rotacja, vec3(0,3.4,0), vec3(0.35,0.35,0.35));
+	czlowiek = new Czlowiek(rotacja, vec3(0,1.5,0), vec3(0.35,0.35,0.35));
+	cout << "skybox" << endl;
+	skybox = new Model("Modele/SkyBox.obj", "Tekstury/SkyBox.png", "Tekstury/SkyBox.png", 3);
 }
 
 //usuwa sciezki i ludzika
@@ -323,6 +383,7 @@ void DeleteLvl()
 	delete krzeslo;
 	delete alkohol;
 	delete czlowiek;
+	delete skybox;
 }
 
 //Zwolnienie zasobów zajêtych przez program
@@ -440,9 +501,140 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam
 
 	drawObject(*czlowiek->GetAktModel(), shaderProgram, V, P, angle_x, angle_y, czlowiek->rotacja, czlowiek->translacja, czlowiek->skalowanie);
 
+	drawObject(*skybox, shaderProgram, V, P, 0, 0, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+
 	glDisableVertexAttribArray(0);
 	//Przerzuæ tylny bufor na przedni
 	glfwSwapBuffers(window);
+}
+
+int ruch = BRAK;
+bool ewoluowal[5];
+
+void Koniec_tury()
+{
+	//Zerowanie tab ewolucji
+	for (int i = 0; i <= 4; i++)
+		ewoluowal[i] = false;
+	wybrany = BRAK;
+}
+
+//Funkcje z *Up zwracaja true, jesli dana sciezka moze ewoluowac
+bool NaukaUp()
+{
+	return false;
+}
+
+bool PracaUp()
+{
+	return false;
+}
+
+bool KrzesloUp()
+{
+	return false;
+}
+
+bool AlkoholUp()
+{
+	return false;
+}
+
+bool(*Up[5])() = { NULL, NaukaUp, PracaUp, KrzesloUp, AlkoholUp};
+
+void Ewoluuj()
+{
+	bool zmiana = false;
+
+	if (ruch == BRAK)
+	{
+		switch (wybrany)
+		{
+		case NAUKA:
+		{
+			nauka->Inclvl();
+			ewoluowal[NAUKA] = true;
+		}break;
+
+		case PRACA:
+		{
+			praca->Inclvl();
+			ewoluowal[PRACA] = true;
+		}break;
+
+		case KRZESLO:
+		{
+			krzeslo->Inclvl();
+			ewoluowal[KRZESLO] = true;
+		}break;
+
+		case ALKOHOL:
+		{
+			alkohol->Inclvl();
+			ewoluowal[ALKOHOL] = true;
+		}break;
+
+		default:
+			cout << "Blad! ruch = BRAK";
+			break;
+		}
+		ruch = wybrany;
+		zmiana = true;
+	}
+	else
+	{
+		if (ruch == CZLOWIEK)
+		{
+			if (czlowiek->GetCel() == czlowiek->translacja)
+				ruch = BRAK;
+			else
+				zmiana = true;
+		}
+
+		if (ruch!=CZLOWIEK)
+		{
+			for (int i = 1; i <= 4; i++)
+			{
+				if (!ewoluowal[i] && Up[i])
+				{
+
+					ruch = i;
+					zmiana = true;
+					break;
+				}
+				
+			}
+		}
+	}
+
+	/*switch (wybrany)
+	{
+	case NAUKA:
+	{
+
+	}break;
+
+	case PRACA:
+	{
+
+	}break;
+
+	case KRZESLO:
+	{
+
+	}break;
+
+	case ALKOHOL:
+	{
+
+	}break;
+
+	default:
+		break;
+	}*/
+
+	if (!zmiana)
+		Koniec_tury();
 }
 
 int main(void)
@@ -481,11 +673,22 @@ int main(void)
 	
 	initOpenGLProgram(window); //Operacje inicjuj¹ce
 
+	//Zerowanie tab ewolucji
+	for (int i = 0; i <= 4; i++)
+	{
+		ewoluowal[i] = false;
+	}
+
 	glfwSetTime(0); //Wyzeruj licznik czasu
 	
 					//G³ówna pêtla
 	while (!glfwWindowShouldClose(window)) //Tak d³ugo jak okno nie powinno zostaæ zamkniête
 	{
+		if (wybrany != BRAK)
+		{
+			Ewoluuj();
+		}
+
 		if (glfwGetTime() > 0.01)
 		{
 			angle_cam = cameraMove * glfwGetTime();
