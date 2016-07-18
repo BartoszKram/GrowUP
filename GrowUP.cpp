@@ -27,13 +27,26 @@ ShaderProgram *shaderProgram; //WskaŸnik na obiekt reprezentuj¹cy program cieniu
 
 //Wybor gracza
 const int BRAK = 0;
+const int KONIEC = 0;
 const int NAUKA = 1;
 const int PRACA = 2;
 const int KRZESLO = 3;
 const int ALKOHOL = 4;
 const int CZLOWIEK = 5;
 
-int wybrany = BRAK;
+int opoznienie = 0;
+
+struct SStan
+{
+	int wartosc = 0;
+	int wybrany = BRAK;
+	int nr_ruchu = 1;
+	int sekwencja = 0;
+	int decyzja = KONIEC;
+}stangry, *stany;
+
+int ilstanow;
+
 bool ifwybrany[5] = { 0 };
 
 //Procedura obs³ugi klawiatury
@@ -51,26 +64,26 @@ void key_callback(GLFWwindow* window, int key,
 		if (key == GLFW_KEY_X) praca->Inclvl();
 		if (key == GLFW_KEY_C) krzeslo->Inclvl();
 		if (key == GLFW_KEY_V) alkohol->Inclvl();
-		if (wybrany == BRAK)
+		if (stangry.wybrany == BRAK)
 		{
 			if (key == GLFW_KEY_1 && !ifwybrany[NAUKA])
 			{
-				wybrany = NAUKA;
+				stangry.wybrany = NAUKA;
 				ifwybrany[NAUKA] = true;
 			}
 			if (key == GLFW_KEY_2 && !ifwybrany[PRACA]) 
 			{
-				wybrany = PRACA;
+				stangry.wybrany = PRACA;
 				ifwybrany[PRACA] = true;
 			}
 			if (key == GLFW_KEY_3 && !ifwybrany[KRZESLO]) 
 			{
-				wybrany = KRZESLO;
+				stangry.wybrany = KRZESLO;
 				ifwybrany[KRZESLO] = true;
 			}
 			if (key == GLFW_KEY_4 && !ifwybrany[ALKOHOL])
 			{
-				wybrany = ALKOHOL;
+				stangry.wybrany = ALKOHOL;
 				ifwybrany[ALKOHOL] = true;
 			}
 		}
@@ -230,7 +243,7 @@ void LoadNauka()
 
 	poziomy.push_back(modele);
 	
-	nauka = new Lvl(poziomy, maxlvl, vec3(0,0,0), vec3(3,0,0), vec3(1,1,1));
+	nauka = new Lvl(poziomy, maxlvl, vec3(0,-M_PI/2,0), vec3(3,0,0), vec3(1,1,1));
 }
 
 //Laduje modele do sciezki praca
@@ -238,7 +251,7 @@ void LoadPraca()
 {
 	vector<vector<Model>> poziomy;
 	vector<Model> modele;
-	int maxlvl = 4;
+	int maxlvl = 3;
 
 	//Poziom 0 - pusty, brak obiektu
 	poziomy.push_back(modele);
@@ -253,15 +266,7 @@ void LoadPraca()
 
 	modele.clear();
 
-	//Poziom 2 - praca (mac?)
-	Model mc("Modele/Praca2.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
-	modele.push_back(mc);
-
-	poziomy.push_back(modele);
-
-	modele.clear();
-
-	//Poziom 3 - biuro
+	//Poziom 2 - biuro
 	Model biuro("Modele/Praca3.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(biuro);
 
@@ -269,13 +274,13 @@ void LoadPraca()
 
 	modele.clear();
 
-	//Poziom 4 - ??
+	//Poziom 3 - biuro2
 	Model qwer("Modele/Praca4.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(qwer);
 
 	poziomy.push_back(modele);
 
-	praca = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-3, 0, 0), vec3(1, 1, 1));
+	praca = new Lvl(poziomy, maxlvl, vec3(0, M_PI/2, 0), vec3(-3, 0, 0), vec3(1, 1, 1));
 }
 
 //Laduje modele do sciezki krzeslo
@@ -283,13 +288,13 @@ void LoadKrzeslo()
 {
 	vector<vector<Model>> poziomy;
 	vector<Model> modele;
-	int maxlvl = 4;
+	int maxlvl = 3;
 
 	//Poziom 0 - pusty, brak obiektu
 	poziomy.push_back(modele);
 
 	//Poziom 1 - taboret
-	Model taboret("Modele/Krzeslo1.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(1, 0, 0), vec3(1, 1, 1));
+	Model taboret("Modele/Krzeslo1.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(taboret);
 
 	poziomy.push_back(modele);
@@ -297,7 +302,7 @@ void LoadKrzeslo()
 	modele.clear();
 
 	//Poziom 2 - krzeslo
-	Model krzeslo1("Modele/Krzeslo2.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model krzeslo1("Modele/Krzeslo2.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.6, 0.6, 0.6));
 	modele.push_back(krzeslo1);
 
 	poziomy.push_back(modele);
@@ -307,14 +312,6 @@ void LoadKrzeslo()
 	//Poziom 3 - fotel
 	Model fotel("Modele/Krzeslo3.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(fotel);
-
-	poziomy.push_back(modele);
-
-	modele.clear();
-
-	//Poziom 3 - fotel
-	Model asdf("Modele/Krzeslo4.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
-	modele.push_back(asdf);
 
 	poziomy.push_back(modele);
 
@@ -328,13 +325,13 @@ void LoadAlkohol()
 	vector<Model> modele;
 	int maxlvl = 3;
 
-	//Poziom 0 - pusty, brak obiektu (barek??)
-	Model barek("Modele/Alkohol1.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
-	modele.push_back(barek);
-
+	//Poziom 0 - pusty, brak obiektu
 	poziomy.push_back(modele);
 
 	//Poziom 1 - piwo + barek
+	Model barek("Modele/Alkohol1.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	modele.push_back(barek);
+	
 	Model piwo("Modele/Alkohol2.obj", "Tekstury/Alkohol2.png", "Tekstury/Alkohol2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(piwo);
 
@@ -355,27 +352,50 @@ void LoadAlkohol()
 	alkohol = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-2, 0, -3), vec3(1, 1, 1));
 }
 
-//Laduje sciezki i studenta
+//Laduje zawartosc pliku rozwoj.txt do tabeli stany
+void LoadStany()
+{
+	ifstream file;
+	file.open("rozwoj.txt", ios::in);
+	file >> ilstanow;
+	stany = new SStan[ilstanow];
+	for (int i = 0; i < ilstanow; i++)
+	{
+		file >> stany[i].wartosc >> stany[i].wybrany >> stany[i].nr_ruchu >> stany[i].sekwencja >> stany[i].decyzja;
+	}
+
+	/*for (int i = 0; i < ilstanow; i++)
+	{
+		cout << stany[i].wartosc << " " << stany[i].wybrany << " " << stany[i].nr_ruchu << " " << stany[i].sekwencja << " " << stany[i].decyzja << endl;
+	}*/
+
+	file.close();
+}
+
+//Laduje sciezki, studenta i stany
 void LoadLvl()
 {
-	cout << "nauka" << endl;
+	cout << "Laduje nauka" << endl;
 	LoadNauka();
-	cout << "praca" << endl;
+	cout << "Laduje praca" << endl;
 	LoadPraca();
-	cout << "krzeslo" << endl;
+	cout << "Laduje krzeslo" << endl;
 	LoadKrzeslo();
-	cout << "alkohol" << endl;
+	cout << "Laduje alkohol" << endl;
 	LoadAlkohol();
-	cout << "czlowiek" << endl;
+	cout << "Laduje czlowiek" << endl;
 	vec3 rotacja(0, 0, 0);
 	rotacja.y = ((-1 * 360 / M_PI *(atan2(eye.z, eye.x)) / 2) + 90) / 180 * M_PI;
 
 	czlowiek = new Czlowiek(rotacja, vec3(0,1.5,0), vec3(0.35,0.35,0.35));
-	cout << "skybox" << endl;
-	skybox = new Model("Modele/SkyBox.obj", "Tekstury/SkyBox.png", "Tekstury/SkyBox.png", 3);
+	cout << "Laduje skybox" << endl;
+	skybox = new Model("Modele/SkyBox.obj", "Tekstury/SkyBox.png", "Tekstury/SkyBox.png", 3, vec3(0,0,0), vec3(0,-1,0), vec3(1,1,1));
+
+	cout << "Laduje stany" << endl;
+	LoadStany();
 }
 
-//usuwa sciezki i ludzika
+//usuwa sciezki, studenta i stany
 void DeleteLvl()
 {
 	delete nauka;
@@ -384,6 +404,7 @@ void DeleteLvl()
 	delete alkohol;
 	delete czlowiek;
 	delete skybox;
+	delete[] stany;
 }
 
 //Zwolnienie zasobów zajêtych przez program
@@ -508,133 +529,155 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam
 	glfwSwapBuffers(window);
 }
 
-int ruch = BRAK;
-bool ewoluowal[5];
-
-void Koniec_tury()
+//Liczy stan gry
+int StanGry()
 {
-	//Zerowanie tab ewolucji
-	for (int i = 0; i <= 4; i++)
-		ewoluowal[i] = false;
-	wybrany = BRAK;
+	int stan = 0;
+	stan += nauka->Getlvl();
+	stan += praca->Getlvl() * 8;
+	stan += krzeslo->Getlvl() * 32;
+	stan += alkohol->Getlvl() * 128;
+	return stan;
 }
 
-//Funkcje z *Up zwracaja true, jesli dana sciezka moze ewoluowac
-bool NaukaUp()
+void Decyzja()
 {
-	return false;
+	bool brak = true;
+	for (int i = 0; i < ilstanow; i++)
+	{
+		if (stangry.wartosc == stany[i].wartosc && stangry.wybrany == stany[i].wybrany &&
+			stangry.nr_ruchu == stany[i].nr_ruchu && stangry.sekwencja == stany[i].sekwencja)
+		{
+			stangry.decyzja = stany[i].decyzja;
+			brak = false;
+
+			cout << "******" << endl;
+			cout << "Decyzja: " << stany[i].decyzja << endl;
+			cout << "Gra Decyzja: " << stangry.decyzja << endl;
+			cout << "Wartosc: " << stany[i].wartosc << endl;
+			cout << "Wybrany: " << stany[i].wybrany << endl;
+			cout << "Nr ruchu: " << stany[i].nr_ruchu << endl;
+			cout << "Sekwencja: " << stany[i].sekwencja << endl;
+			cout << "******" << endl << endl;
+		}
+	}
+
+	if (brak)
+	{
+		cout << endl;
+		cout << "Brak stanu gry: " << endl;
+		cout << "Wartosc: " << stangry.wartosc << endl;
+		cout << "Wybrany: " << stangry.wybrany << endl;
+		cout << "Nr ruchu: " << stangry.nr_ruchu << endl;
+		cout << "Sekwencja: " << stangry.sekwencja << endl<<endl;
+		cout << "Nauka: " << nauka->Getlvl() << endl;
+		cout << "Praca: " << praca->Getlvl() << endl;
+		cout << "Krzeslo: " << krzeslo->Getlvl() << endl;
+		cout << "Alkohol: " << alkohol->Getlvl() << endl;
+		cout << "Stan gry (liczony) " << StanGry() << endl;
+		exit(EXIT_FAILURE);
+	}
 }
 
-bool PracaUp()
+void NowyRuch()
 {
-	return false;
+	cout << endl<< "----------Nowy ruch-------------" << endl<<endl;
+	stangry.decyzja = KONIEC;
+	stangry.nr_ruchu++;
+	stangry.sekwencja = 0;
+	stangry.wartosc = StanGry();
+	stangry.wybrany = BRAK;
 }
-
-bool KrzesloUp()
-{
-	return false;
-}
-
-bool AlkoholUp()
-{
-	return false;
-}
-
-bool(*Up[5])() = { NULL, NaukaUp, PracaUp, KrzesloUp, AlkoholUp};
 
 void Ewoluuj()
 {
-	bool zmiana = false;
+	cout << "---------------------------------" << endl << endl;
+	cout << "Wartosc: " << stangry.wartosc << endl;
+	cout << "Wybrany: " << stangry.wybrany << endl;
+	cout << "Nr ruchu: " << stangry.nr_ruchu << endl;
+	cout << "Sekwencja: " << stangry.sekwencja << endl<<endl;
+	cout << "Nauka: " << nauka->Getlvl() << endl;
+	cout << "Praca: " << praca->Getlvl() << endl;
+	cout << "Krzeslo: " << krzeslo->Getlvl() << endl;
+	cout << "Alkohol: " << alkohol->Getlvl() << endl;
+	cout << "Stan gry (liczony) " << StanGry() << endl <<endl;
 
-	if (ruch == BRAK)
+	if (stangry.wartosc != StanGry())
 	{
-		switch (wybrany)
+		cout << "Stan gry nie jest zgodny!" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	if (stangry.sekwencja == 0)
+	{
+		switch (stangry.wybrany)
 		{
-		case NAUKA:
-		{
+		case NAUKA: {
 			nauka->Inclvl();
-			ewoluowal[NAUKA] = true;
-		}break;
+			}break;
 
-		case PRACA:
-		{
+		case PRACA: {
 			praca->Inclvl();
-			ewoluowal[PRACA] = true;
 		}break;
 
-		case KRZESLO:
-		{
+		case KRZESLO: {
 			krzeslo->Inclvl();
-			ewoluowal[KRZESLO] = true;
 		}break;
 
-		case ALKOHOL:
-		{
+		case ALKOHOL: {
 			alkohol->Inclvl();
-			ewoluowal[ALKOHOL] = true;
 		}break;
 
 		default:
-			cout << "Blad! ruch = BRAK";
+		{
+			cout << "Zly wybor!" << endl;
+			exit(EXIT_FAILURE);
+		}
 			break;
 		}
-		ruch = wybrany;
-		zmiana = true;
+		stangry.sekwencja++;
+		stangry.wartosc = StanGry();
 	}
 	else
 	{
-		if (ruch == CZLOWIEK)
+		Decyzja();
+		switch (stangry.decyzja)
 		{
-			if (czlowiek->GetCel() == czlowiek->translacja)
-				ruch = BRAK;
-			else
-				zmiana = true;
-		}
+		case KONIEC:{
+			NowyRuch();
+		}break;
 
-		if (ruch!=CZLOWIEK)
+		case NAUKA: {
+			nauka->Inclvl();
+			stangry.sekwencja++;
+		}break;
+
+		case PRACA: {
+			praca->Inclvl();
+			stangry.sekwencja++;
+		}break;
+
+		case KRZESLO: {
+			krzeslo->Inclvl();
+			stangry.sekwencja++;
+		}break;
+
+		case ALKOHOL: {
+			alkohol->Inclvl();
+			stangry.sekwencja++;
+		}break;
+
+		default:
 		{
-			for (int i = 1; i <= 4; i++)
-			{
-				if (!ewoluowal[i] && Up[i])
-				{
-
-					ruch = i;
-					zmiana = true;
-					break;
-				}
-				
-			}
+			cout << "Zla decyzja!" << endl;
+			exit(EXIT_FAILURE);
 		}
+			break;
+		}
+		stangry.wartosc = StanGry();
 	}
-
-	/*switch (wybrany)
-	{
-	case NAUKA:
-	{
-
-	}break;
-
-	case PRACA:
-	{
-
-	}break;
-
-	case KRZESLO:
-	{
-
-	}break;
-
-	case ALKOHOL:
-	{
-
-	}break;
-
-	default:
-		break;
-	}*/
-
-	if (!zmiana)
-		Koniec_tury();
+	cout << "zerowanie" << endl;
+	opoznienie = 0;
 }
 
 int main(void)
@@ -673,18 +716,15 @@ int main(void)
 	
 	initOpenGLProgram(window); //Operacje inicjuj¹ce
 
-	//Zerowanie tab ewolucji
-	for (int i = 0; i <= 4; i++)
-	{
-		ewoluowal[i] = false;
-	}
-
 	glfwSetTime(0); //Wyzeruj licznik czasu
 	
+	//Do jakiej wartosci ma dojsc opoznienie
+	int maxop = 100;
+
 					//G³ówna pêtla
 	while (!glfwWindowShouldClose(window)) //Tak d³ugo jak okno nie powinno zostaæ zamkniête
 	{
-		if (wybrany != BRAK)
+		if (stangry.wybrany != BRAK && opoznienie == maxop)
 		{
 			Ewoluuj();
 		}
@@ -705,6 +745,11 @@ int main(void)
 			drawScene(window, angle_x, angle_y, angle_cam); //Wykonaj procedurê rysuj¹c¹
 			
 			glfwPollEvents(); //Wykonaj procedury callback w zaleznoœci od zdarzeñ jakie zasz³y.
+			
+			if (opoznienie < maxop)
+			{
+				opoznienie++;
+			}
 		}
 	}
 

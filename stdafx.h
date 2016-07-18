@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <cmath>
+#include <fstream>
 
 #include "GL/glew.h"
 #include "GL/glut.h"
