@@ -94,37 +94,42 @@ vec3 Czlowiek::GetCel()
 
 void Czlowiek::Idz()
 {
-	//Dlugosc kroku
-	double speed = 0.1;
-	
-	//Uklad (0,0) , (x2-x1, z2-z1)
-	double x = this->cel.x - this->translacja.x;
-	double z = this->cel.z - this->translacja.z;
-	
-	//znak x i z
-	int xzn = sign(x);
-	int zzn = sign(z);
-	
-	double odl = sqrt(x*x + z*z);
-
-	if (odl > speed)
-	{	
-		//y z twierdzenia talesa, x z pitagorasa
-		vec3 przem;
-		przem.y = 0;
-		przem.z = z / odl * speed;
-		if (zzn * przem.z < speed)
-			przem.x = xzn * sqrt(speed * speed - przem.z * przem.z);
-		else
-			przem.x = 0;
-			
-		this->translacja+=przem;
-
-		this->rotacja.y = ((-1 * 360 / M_PI *(atan2(this->cel.z - this->translacja.z, this->cel.x - this->translacja.x)) / 2) + 90 )/180 * M_PI;
-	}
-	else
+	if (this->GetCel().x != this->translacja.x || this->GetCel().z != this->translacja.z)
 	{
-		this->translacja.x = this->cel.x;
-		this->translacja.z = this->cel.z;
+		//Dlugosc kroku
+		double speed = 0.1;
+
+		//Uklad (0,0) , (x2-x1, z2-z1)
+		double x = this->cel.x - this->translacja.x;
+		double z = this->cel.z - this->translacja.z;
+
+		//znak x i z
+		int xzn = sign(x);
+		int zzn = sign(z);
+
+		double odl = sqrt(x*x + z*z);
+
+		if (odl > speed)
+		{
+			//y z twierdzenia talesa, x z pitagorasa
+			vec3 przem;
+			przem.y = 0;
+			przem.z = z / odl * speed;
+			if (zzn * przem.z < speed)
+				przem.x = xzn * sqrt(speed * speed - przem.z * przem.z);
+			else
+				przem.x = 0;
+
+			this->translacja += przem;
+
+			this->rotacja.y = ((-1 * 360 / M_PI *(atan2(this->cel.z - this->translacja.z, this->cel.x - this->translacja.x)) / 2) + 90) / 180 * M_PI;
+		}
+		else
+		{
+			this->translacja.x = this->cel.x;
+			this->translacja.z = this->cel.z;
+			if (this->translacja.x == 0 && this->translacja.z == 0)
+				this->rotacja.y = ((-1 * 360 / M_PI *(atan2(1 - this->translacja.z, 0 - this->translacja.x)) / 2) + 90) / 180 * M_PI;
+		}
 	}
 }

@@ -16,7 +16,7 @@ Czlowiek *czlowiek;
 Model *skybox;
 
 //vector umiejscowienia kamery
-vec3 eye = vec3(0.0f, 5.0f, 5.0f);
+vec3 eye = vec3(0.0f, 8.0f, 14.0f);
 
 float cameraSpeed_x = 0; // [radiany/s] obrot obiektu wokol osi x (pozniej do wywalenia)
 float cameraSpeed_y = 0; // [radiany/s] obrot obiektu wokol osi y (pozniej do wywalenia)
@@ -27,12 +27,16 @@ ShaderProgram *shaderProgram; //WskaŸnik na obiekt reprezentuj¹cy program cieniu
 
 //Wybor gracza
 const int BRAK = 0;
-const int KONIEC = 0;
 const int NAUKA = 1;
 const int PRACA = 2;
 const int KRZESLO = 3;
 const int ALKOHOL = 4;
-const int CZLOWIEK = 5;
+
+//koniec ruchu
+const int KONIEC = 0;
+
+//przejdz na pozycje startowa
+const int START = 0;
 
 int opoznienie = 0;
 
@@ -203,6 +207,11 @@ void initOpenGLProgram(GLFWwindow* window) {
 	loadObjectVBO(skybox);
 }
 
+//Zwolnienie zasobów zajêtych przez program
+void freeOpenGLProgram() {
+	delete shaderProgram; //Usuniêcie programu cieniuj¹cego
+}
+
 //Laduje modele do sciezki nauka
 void LoadNauka()
 {
@@ -280,7 +289,7 @@ void LoadPraca()
 
 	poziomy.push_back(modele);
 
-	praca = new Lvl(poziomy, maxlvl, vec3(0, M_PI/2, 0), vec3(-3, 0, 0), vec3(1, 1, 1));
+	praca = new Lvl(poziomy, maxlvl, vec3(0, M_PI/2, 0), vec3(-5, 0, 2), vec3(1, 1, 1));
 }
 
 //Laduje modele do sciezki krzeslo
@@ -323,7 +332,7 @@ void LoadAlkohol()
 {
 	vector<vector<Model>> poziomy;
 	vector<Model> modele;
-	int maxlvl = 3;
+	int maxlvl = 2;
 
 	//Poziom 0 - pusty, brak obiektu
 	poziomy.push_back(modele);
@@ -337,16 +346,13 @@ void LoadAlkohol()
 
 	poziomy.push_back(modele);
 
-	//Poziom 2 - wodka + piwo + barek
+	//Poziom 2 - whisky + wodka + piwo + barek
 	Model wodka("Modele/Alkohol3.obj", "Tekstury/Alkohol3.png", "Tekstury/Alkohol3.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(wodka);
-
-	poziomy.push_back(modele);
-
-	//Poziom 3 - whisky + wodka + piwo + barek
+	
 	Model whisky("Modele/Alkohol4.obj", "Tekstury/Alkohol4.png", "Tekstury/Alkohol4.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(whisky);
-
+	
 	poziomy.push_back(modele);
 
 	alkohol = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-2, 0, -3), vec3(1, 1, 1));
@@ -387,7 +393,7 @@ void LoadLvl()
 	vec3 rotacja(0, 0, 0);
 	rotacja.y = ((-1 * 360 / M_PI *(atan2(eye.z, eye.x)) / 2) + 90) / 180 * M_PI;
 
-	czlowiek = new Czlowiek(rotacja, vec3(0,1.5,0), vec3(0.35,0.35,0.35));
+	czlowiek = new Czlowiek(rotacja, vec3(0, 0, 0), vec3(0.5, 0.5, 0.5));
 	cout << "Laduje skybox" << endl;
 	skybox = new Model("Modele/SkyBox.obj", "Tekstury/SkyBox.png", "Tekstury/SkyBox.png", 3, vec3(0,0,0), vec3(0,-1,0), vec3(1,1,1));
 
@@ -407,11 +413,6 @@ void DeleteLvl()
 	delete[] stany;
 }
 
-//Zwolnienie zasobów zajêtych przez program
-void freeOpenGLProgram() {
-	delete shaderProgram; //Usuniêcie programu cieniuj¹cego
-}
-
 void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, float rotation_x,float rotation_y, vec3 rotacja, vec3 translacja, vec3 skalowanie) {
 
 	/*TODO LIST
@@ -421,34 +422,38 @@ void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, floa
 	*/
 
 	mat4 modelMatrix = model.M;
-	
-	//Transformacje lvl lub czlowieka
-	modelMatrix = scale(modelMatrix, skalowanie);
+
+	//Transformacje danego modelu 
 	modelMatrix = translate(modelMatrix, translacja);
 
 	modelMatrix = rotate(modelMatrix, rotacja.x, vec3(1, 0, 0));
 	modelMatrix = rotate(modelMatrix, rotacja.y, vec3(0, 1, 0));
 	modelMatrix = rotate(modelMatrix, rotacja.z, vec3(0, 0, 1));
+	modelMatrix = scale(modelMatrix, skalowanie);
 
-	//Transformacje danego modelu 
-	modelMatrix = scale(modelMatrix, model.skalowanie);
 	modelMatrix = translate(modelMatrix, model.translacja);
-	
 	modelMatrix = rotate(modelMatrix, model.rotacja.x, vec3(1, 0, 0));
 	modelMatrix = rotate(modelMatrix, model.rotacja.y, vec3(0, 1, 0));
 	modelMatrix = rotate(modelMatrix, model.rotacja.z, vec3(0, 0, 1));
+	modelMatrix = scale(modelMatrix, model.skalowanie);
+	
+
+	//Transformacje lvl lub czlowieka
+	
+	
 
 	//Rotacja wynikajaca z wcisniecia strzalek
 	modelMatrix = rotate(modelMatrix, rotation_x, vec3(1, 0, 0));
 	modelMatrix = rotate(modelMatrix, rotation_y, vec3(0, 1, 0));
-	
+
+
 	shaderProgram->use();
 
 	//1.Aktualizacja uniformów
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("P"), 1, false, glm::value_ptr(mP));
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("V"), 1, false, glm::value_ptr(mV));
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("M"), 1, false, glm::value_ptr(modelMatrix));
-	glUniform4f(shaderProgram->getUniformLocation("lightPos0"), 0, 2, 0, 1); //Przekazanie wspó³rzêdnych Ÿród³a œwiat³a do zmiennej jednorodnej lightPos0
+	glUniform4f(shaderProgram->getUniformLocation("lightPos0"), 10, 10, 10, 1); //Przekazanie wspó³rzêdnych Ÿród³a œwiat³a do zmiennej jednorodnej lightPos0
 
 	//2.Bindowanie tekstury
 	glUniform1i(shaderProgram->getUniformLocation("myTextureSampler"), 0);
@@ -589,95 +594,182 @@ void NowyRuch()
 	stangry.wybrany = BRAK;
 }
 
-void Ewoluuj()
+void IdzDo(int gdzie)
 {
-	cout << "---------------------------------" << endl << endl;
-	cout << "Wartosc: " << stangry.wartosc << endl;
-	cout << "Wybrany: " << stangry.wybrany << endl;
-	cout << "Nr ruchu: " << stangry.nr_ruchu << endl;
-	cout << "Sekwencja: " << stangry.sekwencja << endl<<endl;
-	cout << "Nauka: " << nauka->Getlvl() << endl;
-	cout << "Praca: " << praca->Getlvl() << endl;
-	cout << "Krzeslo: " << krzeslo->Getlvl() << endl;
-	cout << "Alkohol: " << alkohol->Getlvl() << endl;
-	cout << "Stan gry (liczony) " << StanGry() << endl <<endl;
-
-	if (stangry.wartosc != StanGry())
+	switch (gdzie)
 	{
-		cout << "Stan gry nie jest zgodny!" << endl;
+	case START:{
+		czlowiek->SetCel(vec3(0,0,0));
+	}break;
+	
+	case NAUKA: {
+		czlowiek->SetCel(nauka->translacja);
+	}break;
+
+	case PRACA: {
+		czlowiek->SetCel(praca->translacja);
+	}break;
+
+	case KRZESLO: {
+		czlowiek->SetCel(krzeslo->translacja);
+	}break;
+
+	case ALKOHOL: {
+		czlowiek->SetCel(alkohol->translacja);
+	}break;
+
+	default:
+	{
+		cout << "Nieznany cel!" << endl;
 		exit(EXIT_FAILURE);
 	}
+		break;
+	}
+}
 
-	if (stangry.sekwencja == 0)
+void Ewoluuj()
+{
+	if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
 	{
-		switch (stangry.wybrany)
+		cout << "---------------------------------" << endl << endl;
+		cout << "Wartosc: " << stangry.wartosc << endl;
+		cout << "Wybrany: " << stangry.wybrany << endl;
+		cout << "Nr ruchu: " << stangry.nr_ruchu << endl;
+		cout << "Sekwencja: " << stangry.sekwencja << endl << endl;
+		cout << "Nauka: " << nauka->Getlvl() << endl;
+		cout << "Praca: " << praca->Getlvl() << endl;
+		cout << "Krzeslo: " << krzeslo->Getlvl() << endl;
+		cout << "Alkohol: " << alkohol->Getlvl() << endl;
+		cout << "Stan gry (liczony) " << StanGry() << endl << endl;
+
+		if (stangry.wartosc != StanGry())
 		{
-		case NAUKA: {
-			nauka->Inclvl();
+			cout << "Stan gry nie jest zgodny!" << endl;
+			exit(EXIT_FAILURE);
+		}
+
+		if (stangry.sekwencja == 0)
+		{
+			switch (stangry.wybrany)
+			{
+			case NAUKA: {
+				IdzDo(NAUKA);
+				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
+				{
+					nauka->Inclvl();
+					stangry.sekwencja++;
+					stangry.wartosc = StanGry();
+					IdzDo(START);
+				}
 			}break;
 
-		case PRACA: {
-			praca->Inclvl();
-		}break;
+			case PRACA: {
+				IdzDo(PRACA);
+				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
+				{
+					praca->Inclvl();
+					stangry.sekwencja++;
+					stangry.wartosc = StanGry();
+					IdzDo(START);
+				}
+			}break;
 
-		case KRZESLO: {
-			krzeslo->Inclvl();
-		}break;
+			case KRZESLO: {
+				IdzDo(KRZESLO);
+				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
+				{
+					krzeslo->Inclvl();
+					stangry.sekwencja++;
+					stangry.wartosc = StanGry();
+					IdzDo(START);
+				}
+			}break;
 
-		case ALKOHOL: {
-			alkohol->Inclvl();
-		}break;
+			case ALKOHOL: {
+				IdzDo(ALKOHOL);
+				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
+				{
+					alkohol->Inclvl();
+					stangry.sekwencja++;
+					stangry.wartosc = StanGry();
+					IdzDo(START);
+				}
+			}break;
 
-		default:
+			default:
+			{
+				cout << "Zly wybor!" << endl;
+				exit(EXIT_FAILURE);
+			}
+				break;
+			}
+		}
+		else
 		{
-			cout << "Zly wybor!" << endl;
-			exit(EXIT_FAILURE);
+			Decyzja();
+			switch (stangry.decyzja)
+			{
+			case KONIEC:{
+				IdzDo(START);
+				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
+				{
+					NowyRuch();
+				}
+				
+			}break;
+
+			case NAUKA: {
+				IdzDo(NAUKA);
+				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
+				{
+					nauka->Inclvl();
+					stangry.sekwencja++;
+					IdzDo(START);
+				}
+			}break;
+
+			case PRACA: {
+				IdzDo(PRACA);
+				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
+				{
+					praca->Inclvl();
+					stangry.sekwencja++;
+					IdzDo(START);
+				}
+			}break;
+
+			case KRZESLO: {
+				IdzDo(KRZESLO);
+				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
+				{
+					krzeslo->Inclvl();
+					stangry.sekwencja++;
+					IdzDo(START);
+				}
+			}break;
+
+			case ALKOHOL: {
+				IdzDo(ALKOHOL);
+				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
+				{
+					alkohol->Inclvl();
+					stangry.sekwencja++;
+					IdzDo(START);
+				}
+			}break;
+
+			default:
+			{
+				cout << "Zla decyzja!" << endl;
+				exit(EXIT_FAILURE);
+			}
+				break;
+			}
+			stangry.wartosc = StanGry();
 		}
-			break;
-		}
-		stangry.sekwencja++;
-		stangry.wartosc = StanGry();
+		cout << "zerowanie" << endl;
+		opoznienie = 0;
 	}
-	else
-	{
-		Decyzja();
-		switch (stangry.decyzja)
-		{
-		case KONIEC:{
-			NowyRuch();
-		}break;
-
-		case NAUKA: {
-			nauka->Inclvl();
-			stangry.sekwencja++;
-		}break;
-
-		case PRACA: {
-			praca->Inclvl();
-			stangry.sekwencja++;
-		}break;
-
-		case KRZESLO: {
-			krzeslo->Inclvl();
-			stangry.sekwencja++;
-		}break;
-
-		case ALKOHOL: {
-			alkohol->Inclvl();
-			stangry.sekwencja++;
-		}break;
-
-		default:
-		{
-			cout << "Zla decyzja!" << endl;
-			exit(EXIT_FAILURE);
-		}
-			break;
-		}
-		stangry.wartosc = StanGry();
-	}
-	cout << "zerowanie" << endl;
-	opoznienie = 0;
 }
 
 int main(void)
@@ -740,17 +832,17 @@ int main(void)
 			wykonywanie animacji na pojedynczych modelach nie ruszaj¹c innych. Obs³uga klawiszy musi byæ
 			blokowana przyk³adow¹ zmienn¹ "enable" do czasu zakoñczenia animacji. Kod bêdzie brzydki ale dzia³aj¹cy ;)
 			*/
-			//czlowiek->SetCel(eye);
 			czlowiek->Idz();
 			drawScene(window, angle_x, angle_y, angle_cam); //Wykonaj procedurê rysuj¹c¹
 			
-			glfwPollEvents(); //Wykonaj procedury callback w zaleznoœci od zdarzeñ jakie zasz³y.
+			
 			
 			if (opoznienie < maxop)
 			{
 				opoznienie++;
 			}
 		}
+		glfwPollEvents(); //Wykonaj procedury callback w zaleznoœci od zdarzeñ jakie zasz³y.
 	}
 
 	freeOpenGLProgram();
