@@ -3,7 +3,7 @@
 
 namespace Models {
 
-	Model::Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, int relLevel)
+	Model::Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, float relLevel)
 	{
 		this->loadModel(nazwaModelu, vertices, uvs, normals);
 
@@ -17,7 +17,7 @@ namespace Models {
 		this->skalowanie = vec3(1, 1, 1);
 	}
 
-	Model::Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, int relLevel, vec3 rotacja, vec3 translacja, vec3 skalowanie)
+	Model::Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, float relLevel, vec3 rotacja, vec3 translacja, vec3 skalowanie)
 		: Model(nazwaModelu, texModelu, texOdbicia, relLevel)
 	{
 		this->rotacja = rotacja;

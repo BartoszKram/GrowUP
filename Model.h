@@ -33,7 +33,7 @@ namespace Models {
 
 		GLint texModelu;
 		GLint texOdbicia;
-		int relLevel;
+		float relLevel;
 
 		vec3 rotacja;
 		vec3 translacja;
@@ -41,8 +41,8 @@ namespace Models {
 
 
 		//Metody
-		Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, int relLevel);
-		Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, int relLevel, vec3 rotacja, vec3 translacja, vec3 skalowanie);
+		Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, float relLevel);
+		Model(const char * nazwaModelu, char* texModelu, char* texOdbicia, float relLevel, vec3 rotacja, vec3 translacja, vec3 skalowanie);
 		void init(const char* nazwaModelu);
 		void drawSolid();
 		float* convert3(vector<vec3> wektor);

@@ -18,8 +18,6 @@ Model *skybox;
 //vector umiejscowienia kamery
 vec3 eye = vec3(0.0f, 8.0f, 14.0f);
 
-float cameraSpeed_x = 0; // [radiany/s] obrot obiektu wokol osi x (pozniej do wywalenia)
-float cameraSpeed_y = 0; // [radiany/s] obrot obiektu wokol osi y (pozniej do wywalenia)
 float cameraMove = 0; // [radiany/s] obrot kamery z czasie gry
 
 				   //Uchwyty na shadery
@@ -38,8 +36,6 @@ const int KONIEC = 0;
 //przejdz na pozycje startowa
 const int START = 0;
 
-int opoznienie = 0;
-
 struct SStan
 {
 	int wartosc = 0;
@@ -51,23 +47,43 @@ struct SStan
 
 int ilstanow;
 
-bool ifwybrany[5] = { 0 };
+bool ifwybrany[5] = { false };
+
+void NowaGra()
+{
+	stangry.wartosc = 0;
+	stangry.wybrany = BRAK;
+	stangry.nr_ruchu = 1;
+	stangry.sekwencja = 0;
+	stangry.decyzja = KONIEC;
+	for (int i = 0; i < 5; i++)
+	{
+		ifwybrany[i] = false;
+	}
+
+	nauka->Restart();
+	praca->Restart();
+	krzeslo->Restart();
+	alkohol->Restart();
+	czlowiek->Restart();
+
+	cout << endl << endl << endl << "******************NOWA GRA*******************" << endl << endl << endl;
+}
 
 //Procedura obs³ugi klawiatury
 void key_callback(GLFWwindow* window, int key,
 	int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
-		if (key == GLFW_KEY_LEFT) cameraSpeed_y = -3.14;
-		if (key == GLFW_KEY_RIGHT) cameraSpeed_y = 3.14;
-		if (key == GLFW_KEY_UP) cameraSpeed_x = -3.14;
-		if (key == GLFW_KEY_DOWN) cameraSpeed_x = 3.14;
-		if (key == GLFW_KEY_Q) czlowiek->SetAnimacja();
-		if (key == GLFW_KEY_A) cameraMove = -3.14;
-		if (key == GLFW_KEY_D) cameraMove = 3.14;
+		if (key == GLFW_KEY_LEFT) cameraMove = -3.14;
+		if (key == GLFW_KEY_RIGHT) cameraMove = 3.14;
+		
 		if (key == GLFW_KEY_Z) nauka->Inclvl();
 		if (key == GLFW_KEY_X) praca->Inclvl();
 		if (key == GLFW_KEY_C) krzeslo->Inclvl();
 		if (key == GLFW_KEY_V) alkohol->Inclvl();
+		
+		if (key == GLFW_KEY_N) NowaGra();
+		
 		if (stangry.wybrany == BRAK)
 		{
 			if (key == GLFW_KEY_1 && !ifwybrany[NAUKA])
@@ -94,12 +110,8 @@ void key_callback(GLFWwindow* window, int key,
 	}
 
 	if (action == GLFW_RELEASE) {
-		if (key == GLFW_KEY_LEFT) cameraSpeed_y = 0;
-		if (key == GLFW_KEY_RIGHT) cameraSpeed_y = 0;
-		if (key == GLFW_KEY_UP) cameraSpeed_x = 0;
-		if (key == GLFW_KEY_DOWN) cameraSpeed_x = 0;
-		if (key == GLFW_KEY_A) cameraMove = 0;
-		if (key == GLFW_KEY_D) cameraMove = 0;
+		if (key == GLFW_KEY_LEFT) cameraMove = 0;
+		if (key == GLFW_KEY_RIGHT) cameraMove = 0;
 	}
 }
 
@@ -324,7 +336,7 @@ void LoadKrzeslo()
 
 	poziomy.push_back(modele);
 
-	krzeslo = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(0, 0, -3), vec3(1, 1, 1));
+	krzeslo = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(0, 0, -5), vec3(1, 1, 1));
 }
 
 //Laduje modele do sciezki alkohol
@@ -355,7 +367,7 @@ void LoadAlkohol()
 	
 	poziomy.push_back(modele);
 
-	alkohol = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-2, 0, -3), vec3(1, 1, 1));
+	alkohol = new Lvl(poziomy, maxlvl, vec3(0, 0, 0), vec3(-2, 0, -5), vec3(1, 1, 1));
 }
 
 //Laduje zawartosc pliku rozwoj.txt do tabeli stany
@@ -413,8 +425,7 @@ void DeleteLvl()
 	delete[] stany;
 }
 
-void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, float rotation_x,float rotation_y, vec3 rotacja, vec3 translacja, vec3 skalowanie) {
-
+void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, vec3 rotacja, vec3 translacja, vec3 skalowanie, float jasnosc) {
 	/*TODO LIST
 	1. Stworzyæ modele i roz³o¿yæ je odpowiednio na siatki.
 	2. Ze stworzonych modeli zrobiæ model scenerii (¿eby wiedzieæ co i gdzie ustawiæ)
@@ -423,29 +434,20 @@ void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, floa
 
 	mat4 modelMatrix = model.M;
 
-	//Transformacje danego modelu 
+	//Transformacje lvl lub czlowieka
 	modelMatrix = translate(modelMatrix, translacja);
 
 	modelMatrix = rotate(modelMatrix, rotacja.x, vec3(1, 0, 0));
 	modelMatrix = rotate(modelMatrix, rotacja.y, vec3(0, 1, 0));
 	modelMatrix = rotate(modelMatrix, rotacja.z, vec3(0, 0, 1));
 	modelMatrix = scale(modelMatrix, skalowanie);
-
+	
+	//Transformacje danego modelu 
 	modelMatrix = translate(modelMatrix, model.translacja);
 	modelMatrix = rotate(modelMatrix, model.rotacja.x, vec3(1, 0, 0));
 	modelMatrix = rotate(modelMatrix, model.rotacja.y, vec3(0, 1, 0));
 	modelMatrix = rotate(modelMatrix, model.rotacja.z, vec3(0, 0, 1));
 	modelMatrix = scale(modelMatrix, model.skalowanie);
-	
-
-	//Transformacje lvl lub czlowieka
-	
-	
-
-	//Rotacja wynikajaca z wcisniecia strzalek
-	modelMatrix = rotate(modelMatrix, rotation_x, vec3(1, 0, 0));
-	modelMatrix = rotate(modelMatrix, rotation_y, vec3(0, 1, 0));
-
 
 	shaderProgram->use();
 
@@ -454,6 +456,9 @@ void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, floa
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("V"), 1, false, glm::value_ptr(mV));
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("M"), 1, false, glm::value_ptr(modelMatrix));
 	glUniform4f(shaderProgram->getUniformLocation("lightPos0"), 10, 10, 10, 1); //Przekazanie wspó³rzêdnych Ÿród³a œwiat³a do zmiennej jednorodnej lightPos0
+	glUniform1f(shaderProgram->getUniformLocation("relLevel"), model.relLevel);
+	
+	glUniform4f(shaderProgram->getUniformLocation("Mam"), jasnosc, jasnosc, jasnosc, 1);
 
 	//2.Bindowanie tekstury
 	glUniform1i(shaderProgram->getUniformLocation("myTextureSampler"), 0);
@@ -471,7 +476,7 @@ void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, floa
 }
 
 //Procedura rysuj¹ca zawartoœæ sceny
-void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam) {
+void drawScene(GLFWwindow* window, float angle_cam) {
 	//************Tutaj umieszczaj kod rysuj¹cy obraz******************l
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Wykonaj czyszczenie bufora kolorów
@@ -491,31 +496,30 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam
 	modele = nauka->GetAktModele();
 	for (std::vector<Model>::iterator it = modele->begin(); it != modele->end(); ++it)
 	{
-		drawObject(*it, shaderProgram, V, P, angle_x, angle_y, nauka->rotacja, nauka->translacja, nauka->skalowanie);
+		drawObject(*it, shaderProgram, V, P, nauka->rotacja, nauka->translacja, nauka->skalowanie, nauka->GetJasnosc());
 	}
 
 	//Praca
 	modele = praca->GetAktModele();
 	for (std::vector<Model>::iterator it = modele->begin(); it != modele->end(); ++it)
 	{
-		drawObject(*it, shaderProgram, V, P, angle_x, angle_y, praca->rotacja, praca->translacja, praca->skalowanie);
+		drawObject(*it, shaderProgram, V, P, praca->rotacja, praca->translacja, praca->skalowanie, praca->GetJasnosc());
 	}
 
 	//Krzeslo
 	modele = krzeslo->GetAktModele();
 	for (std::vector<Model>::iterator it = modele->begin(); it != modele->end(); ++it)
 	{
-		drawObject(*it, shaderProgram, V, P, angle_x, angle_y, krzeslo->rotacja, krzeslo->translacja, krzeslo->skalowanie);
+		drawObject(*it, shaderProgram, V, P, krzeslo->rotacja, krzeslo->translacja, krzeslo->skalowanie, krzeslo->GetJasnosc());
 	}
 
 	//Alkohol
 	modele = alkohol->GetAktModele();
 	for (std::vector<Model>::iterator it = modele->begin(); it != modele->end(); ++it)
 	{
-		drawObject(*it, shaderProgram, V, P, angle_x, angle_y, alkohol->rotacja, alkohol->translacja, alkohol->skalowanie);
+		drawObject(*it, shaderProgram, V, P, alkohol->rotacja, alkohol->translacja, alkohol->skalowanie, alkohol->GetJasnosc());
 	}
 	
-
 	//Czlowiek
 	if (czlowiek->GetAnimacja() == true && !czlowiek->GetStan())
 	{
@@ -525,9 +529,9 @@ void drawScene(GLFWwindow* window, float angle_x, float angle_y, float angle_cam
 		czlowiek->ZmienStan();
 	}
 
-	drawObject(*czlowiek->GetAktModel(), shaderProgram, V, P, angle_x, angle_y, czlowiek->rotacja, czlowiek->translacja, czlowiek->skalowanie);
+	drawObject(*czlowiek->GetAktModel(), shaderProgram, V, P, czlowiek->rotacja, czlowiek->translacja, czlowiek->skalowanie, 0);
 
-	drawObject(*skybox, shaderProgram, V, P, 0, 0, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	drawObject(*skybox, shaderProgram, V, P, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1), 0);
 
 	glDisableVertexAttribArray(0);
 	//Przerzuæ tylny bufor na przedni
@@ -584,6 +588,53 @@ void Decyzja()
 	}
 }
 
+void Wynik()
+{
+	int wynik=0;
+	cout << "***********KONIEC GRY!*************" << endl << endl;
+	cout << "Twoj wynik:" << endl;
+	cout << "Nauka: lvl" << nauka->Getlvl();
+	if (nauka->Getlvl() == nauka->Getmaxlvl())
+	{
+		cout << "(max)";
+		wynik++;
+	}
+	cout << endl;
+
+	cout << "Praca: lvl" << praca->Getlvl();
+	if (praca->Getlvl() == praca->Getmaxlvl())
+	{
+		cout << " (max)";
+		wynik++;
+	}
+	cout << endl;
+
+	cout << "Krzeslo: " << "lvl" << krzeslo->Getlvl();
+	if (krzeslo->Getlvl() == krzeslo->Getmaxlvl())
+	{
+		cout << " (max)";
+		wynik++;
+	}
+	cout << endl;
+
+	cout << "Alkohol: " << "lvl" << alkohol->Getlvl();
+	if (alkohol->Getlvl() == alkohol->Getmaxlvl())
+	{
+		cout << " (max)";
+		wynik++;
+	}
+	cout << endl<<endl;
+	if (wynik == 4)
+	{
+		cout << "Odnalazles prawidlowa sekwencje! Gratulujemy!" << endl;
+	}
+	else
+	{
+		cout << "Niestety Twoja sekwencja nie jest najlepsza. Powodzenia nastepnym razem!" << endl;
+	}
+	cout << endl;
+}
+
 void NowyRuch()
 {
 	cout << endl<< "----------Nowy ruch-------------" << endl<<endl;
@@ -592,6 +643,8 @@ void NowyRuch()
 	stangry.sekwencja = 0;
 	stangry.wartosc = StanGry();
 	stangry.wybrany = BRAK;
+	if (stangry.nr_ruchu > 4)
+		Wynik();
 }
 
 void IdzDo(int gdzie)
@@ -603,19 +656,30 @@ void IdzDo(int gdzie)
 	}break;
 	
 	case NAUKA: {
-		czlowiek->SetCel(nauka->translacja);
+		vec3 cel = nauka->translacja;
+		cel.x -= 1;
+		czlowiek->SetCel(cel);
 	}break;
 
 	case PRACA: {
-		czlowiek->SetCel(praca->translacja);
+		vec3 cel = praca->translacja;
+		cel.x += 2.3;
+		czlowiek->SetCel(cel);
+		//vec3(-5, 0, 2)
 	}break;
 
 	case KRZESLO: {
-		czlowiek->SetCel(krzeslo->translacja);
+		vec3 cel = krzeslo->translacja;
+		cel.z += 1.3;
+		czlowiek->SetCel(cel);
+		//vec3(0, 0, -5)
 	}break;
 
 	case ALKOHOL: {
-		czlowiek->SetCel(alkohol->translacja);
+		vec3 cel = alkohol->translacja;
+		cel.z += 1;
+		czlowiek->SetCel(cel);
+		//vec3(-2, 0, -5)
 	}break;
 
 	default:
@@ -642,11 +706,7 @@ void Ewoluuj()
 		cout << "Alkohol: " << alkohol->Getlvl() << endl;
 		cout << "Stan gry (liczony) " << StanGry() << endl << endl;
 
-		if (stangry.wartosc != StanGry())
-		{
-			cout << "Stan gry nie jest zgodny!" << endl;
-			exit(EXIT_FAILURE);
-		}
+		stangry.wartosc = StanGry();
 
 		if (stangry.sekwencja == 0)
 		{
@@ -656,10 +716,9 @@ void Ewoluuj()
 				IdzDo(NAUKA);
 				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
 				{
-					nauka->Inclvl();
+					czlowiek->SpojzNa(nauka->translacja);
+					nauka->StartEwolucji();
 					stangry.sekwencja++;
-					stangry.wartosc = StanGry();
-					IdzDo(START);
 				}
 			}break;
 
@@ -667,10 +726,9 @@ void Ewoluuj()
 				IdzDo(PRACA);
 				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
 				{
-					praca->Inclvl();
+					czlowiek->SpojzNa(praca->translacja);
+					praca->StartEwolucji();
 					stangry.sekwencja++;
-					stangry.wartosc = StanGry();
-					IdzDo(START);
 				}
 			}break;
 
@@ -678,10 +736,9 @@ void Ewoluuj()
 				IdzDo(KRZESLO);
 				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
 				{
-					krzeslo->Inclvl();
+					czlowiek->SpojzNa(krzeslo->translacja);
+					krzeslo->StartEwolucji();
 					stangry.sekwencja++;
-					stangry.wartosc = StanGry();
-					IdzDo(START);
 				}
 			}break;
 
@@ -689,10 +746,9 @@ void Ewoluuj()
 				IdzDo(ALKOHOL);
 				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
 				{
-					alkohol->Inclvl();
+					czlowiek->SpojzNa(alkohol->translacja);
+					alkohol->StartEwolucji();
 					stangry.sekwencja++;
-					stangry.wartosc = StanGry();
-					IdzDo(START);
 				}
 			}break;
 
@@ -722,9 +778,9 @@ void Ewoluuj()
 				IdzDo(NAUKA);
 				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
 				{
-					nauka->Inclvl();
+					czlowiek->SpojzNa(nauka->translacja);
+					nauka->StartEwolucji();
 					stangry.sekwencja++;
-					IdzDo(START);
 				}
 			}break;
 
@@ -732,9 +788,9 @@ void Ewoluuj()
 				IdzDo(PRACA);
 				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
 				{
-					praca->Inclvl();
+					czlowiek->SpojzNa(praca->translacja);
+					praca->StartEwolucji();
 					stangry.sekwencja++;
-					IdzDo(START);
 				}
 			}break;
 
@@ -742,9 +798,9 @@ void Ewoluuj()
 				IdzDo(KRZESLO);
 				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
 				{
-					krzeslo->Inclvl();
+					czlowiek->SpojzNa(krzeslo->translacja);
+					krzeslo->StartEwolucji();
 					stangry.sekwencja++;
-					IdzDo(START);
 				}
 			}break;
 
@@ -752,9 +808,9 @@ void Ewoluuj()
 				IdzDo(ALKOHOL);
 				if (czlowiek->GetCel().x == czlowiek->translacja.x && czlowiek->GetCel().z == czlowiek->translacja.z)
 				{
-					alkohol->Inclvl();
+					czlowiek->SpojzNa(alkohol->translacja);
+					alkohol->StartEwolucji();
 					stangry.sekwencja++;
-					IdzDo(START);
 				}
 			}break;
 
@@ -765,11 +821,54 @@ void Ewoluuj()
 			}
 				break;
 			}
-			stangry.wartosc = StanGry();
 		}
-		cout << "zerowanie" << endl;
-		opoznienie = 0;
 	}
+}
+
+bool NastSekw()
+{
+	if (nauka->Zajety())
+		return false;
+	if (praca->Zajety())
+		return false;
+	if (krzeslo->Zajety())
+		return false;
+	if (alkohol->Zajety())
+		return false;
+	if (czlowiek->Zajety())
+		return false;
+	return true;
+}
+
+//Jesli ktorys lvl ewoluuje, to zmienia jego jasnosci, na koncu ewolucji SetJasnosc zwraca true -> sygnal, ze czlowiek moze wracac na start
+void SetJasnosci()
+{
+	if (nauka->SetJasnosc() || praca->SetJasnosc() || krzeslo->SetJasnosc() || alkohol->SetJasnosc())
+		IdzDo(START);
+}
+
+void Instrukcja()
+{
+	cout << endl << endl << "Witamy w grze Grow Student!" << endl << endl;
+	cout << "W pewnym swiecie zyje samotny student. Chcialby jak najlepiej sie rozwinac, ale nie wie, od czego ma zaczac. ";
+	cout <<	"Ma przed soba do wyboru cztery rzeczy:" <<endl;
+	cout << "-Nauke" << endl;
+	cout << "-Prace" << endl;
+	cout << "-Krzeslo" << endl;
+	cout << "-Alkohol" << endl;
+	cout << "Twoim zadaniem jest odnalezienie kolejnosci wyboru tych rzeczy, by jak najlepiej poprowadzic go przez czas studiow" << endl;
+	cout << "Powodzenia!" << endl << endl;
+	
+	cout << "Sterowanie:" << endl;
+	cout << " 1 - nauka" << endl;
+	cout << " 2 - praca" << endl;
+	cout << " 3 - krzeslo" << endl;
+	cout << " 4 - alkohol" << endl;
+	cout << " N - nowa gra" << endl;
+	cout << " <- - kamera w lewo" << endl;
+	cout << " -> - kamera w prawo" << endl <<endl;
+	
+	cout << "Bartosz Kram & Filip Nienartowicz" << endl;
 }
 
 int main(void)
@@ -791,8 +890,6 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	float angle_x = 0; //K¹t obrotu kamery w osi x
-	float angle_y = 0; //K¹t obrotu kamery w osi y
 	float angle_cam = 0; //K¹t obrotu kamery wokó³ osi y
 
 	glfwMakeContextCurrent(window); //Od tego momentu kontekst okna staje siê aktywny i polecenia OpenGL bêd¹ dotyczyæ w³aœnie jego.
@@ -809,14 +906,12 @@ int main(void)
 	initOpenGLProgram(window); //Operacje inicjuj¹ce
 
 	glfwSetTime(0); //Wyzeruj licznik czasu
-	
-	//Do jakiej wartosci ma dojsc opoznienie
-	int maxop = 100;
 
+	Instrukcja();
 					//G³ówna pêtla
 	while (!glfwWindowShouldClose(window)) //Tak d³ugo jak okno nie powinno zostaæ zamkniête
 	{
-		if (stangry.wybrany != BRAK && opoznienie == maxop)
+		if (stangry.wybrany != BRAK && NastSekw())//opoznienie == maxop)
 		{
 			Ewoluuj();
 		}
@@ -824,8 +919,6 @@ int main(void)
 		if (glfwGetTime() > 0.01)
 		{
 			angle_cam = cameraMove * glfwGetTime();
-			angle_x += cameraSpeed_x*glfwGetTime(); //Zwiêksz k¹t o prêdkoœæ k¹tow¹ razy czas jaki up³yn¹³ od poprzedniej klatki
-			angle_y += cameraSpeed_y*glfwGetTime(); //Zwiêksz k¹t o prêdkoœæ k¹tow¹ razy czas jaki up³yn¹³ od poprzedniej klatki
 			glfwSetTime(0); //Wyzeruj licznik czasu
 			/*
 			Tu bêd¹ wykonywane wszystkie modyfikacje macierzy modeli. Pozwoli to na
@@ -833,14 +926,13 @@ int main(void)
 			blokowana przyk³adow¹ zmienn¹ "enable" do czasu zakoñczenia animacji. Kod bêdzie brzydki ale dzia³aj¹cy ;)
 			*/
 			czlowiek->Idz();
-			drawScene(window, angle_x, angle_y, angle_cam); //Wykonaj procedurê rysuj¹c¹
-			
-			
-			
-			if (opoznienie < maxop)
+			SetJasnosci();
+			drawScene(window, angle_cam); //Wykonaj procedurê rysuj¹c¹
+					
+			/*if (opoznienie < maxop)
 			{
 				opoznienie++;
-			}
+			}*/
 		}
 		glfwPollEvents(); //Wykonaj procedury callback w zaleznoœci od zdarzeñ jakie zasz³y.
 	}

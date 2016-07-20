@@ -27,6 +27,12 @@ public:
 	int Getlvl();
 	void Inclvl();
 	int Getmaxlvl();
+	void StartEwolucji();
+	float GetJasnosc();
+	bool SetJasnosc();
+	int GetEwoluuje();
+	bool Zajety();
+	void Restart();
 	
 	vec3 rotacja;
 	vec3 translacja;
@@ -35,6 +41,10 @@ public:
 private:
 	int lvl;
 	int maxlvl;
+	float jasnosc;
+	bool zwlvl;
+	int ewoluuje; //ilosc zmian jasnosci np. 3 -> 3x (normalny -> jasny -> normalny -> ciemny -> normalny)
+	int jasnoscmod; // 1 - zwieksz, -1 - zmniejsz, 0 - zostaw
 	vector<vector<Model>> modele;
 	
 };

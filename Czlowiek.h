@@ -35,6 +35,9 @@ class Czlowiek
 		void SetCel(vec3 cel);
 		vec3 GetCel();
 		void Idz();
+		bool Zajety();
+		void SpojzNa(vec3 cel);
+		void Restart();
 
 		vec3 rotacja;
 		vec3 translacja;
@@ -46,4 +49,5 @@ class Czlowiek
 		int n;
 		bool animacja;
 		vec3 cel;
+		int opoznienie;
 };

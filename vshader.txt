@@ -6,17 +6,21 @@ uniform mat4 V;
 uniform mat4 M;
 
 uniform vec4 lightPos0; //Wspolrzedne zrodla swiatla w przestrzeni swiata
+uniform vec4 Mam; //Kolor materialu dla swiatla otoczenia
 
 //Atrybuty
 in vec3 vertex; //wspolrzedne wierzcholka w przestrzeni modelu
 in vec2 vertexUV; //wspolrzedne teksturowania
 in vec3 normal; //wektor normalny w wierzcholku 
 
+
 //Zmienne interpolowane
 out vec2 UV;
 out vec4 vN; //interpolowany wektor normalny w przestrzeni oka
 out vec4 vV; //interpolowany wektor do obserwatora w przestrzeni oka
 out vec4 vL; //interpolowany wektor do zrodla swiatla w przestrzeni oka
+
+out vec4 Ma; //Interpolowany Kolor materialu dla swiatla otoczenia
 
 void main(void) {
 	gl_Position=P*V*M*vec4(vertex,1.0); //Oblicz wspolrzedne wierzchołka w przestrzeni przyciecia
@@ -27,4 +31,5 @@ void main(void) {
 
 	//UV of the vertex
 	UV = vertexUV;
+	Ma=Mam;
 }

@@ -16,6 +16,7 @@ Czlowiek::Czlowiek()
 	this->translacja = vec3(0, 0, 0);
 	this->skalowanie = vec3(1, 1, 1);
 	this->cel = this->translacja;
+	opoznienie = 0;
 }
 
 Czlowiek::Czlowiek(vec3 rotacja, vec3 translacja, vec3 skalowanie)
@@ -129,7 +130,40 @@ void Czlowiek::Idz()
 			this->translacja.x = this->cel.x;
 			this->translacja.z = this->cel.z;
 			if (this->translacja.x == 0 && this->translacja.z == 0)
-				this->rotacja.y = ((-1 * 360 / M_PI *(atan2(1 - this->translacja.z, 0 - this->translacja.x)) / 2) + 90) / 180 * M_PI;
+				SpojzNa(vec3(0, 0, 1));
+
+			if (this->cel == vec3(0, 0, 0))
+			{
+				opoznienie = 20;
+			}
 		}
 	}
+}
+
+bool Czlowiek::Zajety()
+{
+	if (this->GetCel().x != this->translacja.x || this->GetCel().z != this->translacja.z)
+		return true;
+	if (this->opoznienie > 0)
+	{
+		opoznienie--;
+		return true;
+	}
+	return false;
+}
+
+void Czlowiek::SpojzNa(vec3 cel)
+{
+	if (this->translacja.x != cel.x || this->translacja.z != cel.z)
+		this->rotacja.y = ((-1 * 360 / M_PI *(atan2(cel.z - this->translacja.z, cel.x - this->translacja.x)) / 2) + 90) / 180 * M_PI;
+}
+
+void Czlowiek::Restart()
+{
+	stan = 0;
+	n = 4;
+	this->translacja = vec3(0, 0, 0);
+	SpojzNa(vec3(0, 0, 1));
+	this->cel = this->translacja;
+	opoznienie = 0;
 }
