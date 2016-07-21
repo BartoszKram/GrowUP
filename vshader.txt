@@ -13,7 +13,6 @@ in vec3 vertex; //wspolrzedne wierzcholka w przestrzeni modelu
 in vec2 vertexUV; //wspolrzedne teksturowania
 in vec3 normal; //wektor normalny w wierzcholku 
 
-
 //Zmienne interpolowane
 out vec2 UV;
 out vec4 vN; //interpolowany wektor normalny w przestrzeni oka
