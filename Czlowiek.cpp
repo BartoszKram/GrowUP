@@ -14,7 +14,7 @@ Czlowiek::Czlowiek()
 	{
 		//char nazwa2[30];
 		
-		Model ludzik("Modele/Czlowiek1 .obj", "Tekstury/Czlowiek.png", "Tekstury/Czlowiek.png", 3);
+		Model ludzik("Modele/Czlowiek101.obj", "Tekstury/Czlowiek.png", "Tekstury/Czlowiek.png", 3);
 		modele.push_back(ludzik);
 	}
 

@@ -20,7 +20,7 @@ void main(void) {
 	vec4 mL=normalize(vL); //normalizuj interpolowany wektor do obserwatora w przestrzeni oka
 	vec4 mV=normalize(vV); //normalizuj interpolowany wektor do zrodla swiatla w przestrzeni oka
 	vec4 mR=reflect(-mL,mN); //oblicz wektor odbity w przestrzeni oka
-
+	
 	
 	vec4 La=vec4(1,1,1,1); //Kolor swiatla otoczenia
 	
@@ -33,7 +33,7 @@ void main(void) {
 	
 	float nl=max(0,dot(mN,mL)); //Oblicz czlon Lamberta
 	float rv=pow(max(0,dot(mN,mL)),shininess); //Oblicz czlon Phonga
-
+	
 	
 	pixelColor=Ma*La+Md*Ld*nl+Ms*Ls*rv; //Oblicz model oswietlenia i zwroc jako kolor piksela
 }
