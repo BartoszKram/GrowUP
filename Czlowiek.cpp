@@ -6,12 +6,18 @@
 Czlowiek::Czlowiek()
 {
 	stan = 0;
-	n = 4;
-	Model ludzik("Modele/Ludzik.obj", "Tekstury/Czlowiek.png", "Tekstury/Czlowiek.png", 3);
-	modele.push_back(ludzik);
-	modele.push_back(ludzik);
-	modele.push_back(ludzik);
-	modele.push_back(ludzik);
+	
+	char nazwa[30] = "Modele/Czlowiek";
+	n = 12;
+
+	for (int i = 1; i <= n; i++)
+	{
+		//char nazwa2[30];
+		
+		Model ludzik("Modele/Czlowiek1 .obj", "Tekstury/Czlowiek.png", "Tekstury/Czlowiek.png", 3);
+		modele.push_back(ludzik);
+	}
+
 	this->rotacja = vec3(0, 0, 0);
 	this->translacja = vec3(0, 0, 0);
 	this->skalowanie = vec3(1, 1, 1);
