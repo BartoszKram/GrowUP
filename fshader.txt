@@ -8,6 +8,7 @@ in vec4 vV; //interpolowany wektor do obserwatora w przestrzeni oka
 in vec4 vL; //interpolowany wektor do zrodla swiatla w przestrzeni oka
 in vec4 Ma; //Kolor materialu dla swiatla otoczenia
 
+
 //Output data
 out vec4 pixelColor; //Zmienna wyjsciowa fragment shadera. Zapisuje sie do niej ostateczny (prawie) kolor piksela
 
