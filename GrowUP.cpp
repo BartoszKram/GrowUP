@@ -14,6 +14,7 @@ Czlowiek *czlowiek;
 
 //SkyBox
 Model *skybox;
+Model *grass;
 
 //vector umiejscowienia kamery
 vec3 eye = vec3(0.0f, 8.0f, 14.0f);
@@ -217,6 +218,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	}
 
 	loadObjectVBO(skybox);
+	loadObjectVBO(grass);
 }
 
 //Zwolnienie zasobów zajêtych przez program
@@ -278,7 +280,7 @@ void LoadPraca()
 	poziomy.push_back(modele);
 
 	//Poziom 1 - Reka z banknotem
-	Model reka("Modele/Praca1.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	Model reka("Modele/Praca1.obj", "Tekstury/Praca1.png", "Tekstury/Praca1.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(reka);
 	//Model banknot("Modele/Banknot.obj", "Tekstury/Dolar.png", "Tekstury/Dolar.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	//modele.push_back(banknot);
@@ -288,7 +290,7 @@ void LoadPraca()
 	modele.clear();
 
 	//Poziom 2 - biuro
-	Model biuro("Modele/Praca3.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model biuro("Modele/Praca4.obj", "Tekstury/Praca4.png", "Tekstury/Praca4.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(biuro);
 
 	poziomy.push_back(modele);
@@ -296,7 +298,7 @@ void LoadPraca()
 	modele.clear();
 
 	//Poziom 3 - biuro2
-	Model qwer("Modele/Praca4.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model qwer("Modele/Praca3.obj", "Tekstury/Praca3.png", "Tekstury/Praca3.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(qwer);
 
 	poziomy.push_back(modele);
@@ -315,7 +317,7 @@ void LoadKrzeslo()
 	poziomy.push_back(modele);
 
 	//Poziom 1 - taboret
-	Model taboret("Modele/Krzeslo1.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	Model taboret("Modele/Krzeslo1.obj", "Tekstury/Krzeslo1.png", "Tekstury/Krzeslo1.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(taboret);
 
 	poziomy.push_back(modele);
@@ -323,7 +325,7 @@ void LoadKrzeslo()
 	modele.clear();
 
 	//Poziom 2 - krzeslo
-	Model krzeslo1("Modele/Krzeslo2.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.6, 0.6, 0.6));
+	Model krzeslo1("Modele/Krzeslo2.obj", "Tekstury/Krzeslo2.png", "Tekstury/Krzeslo2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.6, 0.6, 0.6));
 	modele.push_back(krzeslo1);
 
 	poziomy.push_back(modele);
@@ -331,7 +333,7 @@ void LoadKrzeslo()
 	modele.clear();
 
 	//Poziom 3 - fotel
-	Model fotel("Modele/Krzeslo3.obj", "Tekstury/Rock.png", "Tekstury/Rock.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+	Model fotel("Modele/Krzeslo3.obj", "Tekstury/Krzeslo3.png", "Tekstury/Krzeslo3.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 	modele.push_back(fotel);
 
 	poziomy.push_back(modele);
@@ -350,7 +352,7 @@ void LoadAlkohol()
 	poziomy.push_back(modele);
 
 	//Poziom 1 - piwo + barek
-	Model barek("Modele/Alkohol1.obj", "example2.png", "example2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
+	Model barek("Modele/Alkohol1.obj", "Tekstury/Alkohol1.png", "Tekstury/Alkohol1.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
 	modele.push_back(barek);
 	
 	Model piwo("Modele/Alkohol2.obj", "Tekstury/Alkohol2.png", "Tekstury/Alkohol2.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(0.4, 0.4, 0.4));
@@ -408,6 +410,7 @@ void LoadLvl()
 	czlowiek = new Czlowiek(rotacja, vec3(0, 0, 0), vec3(0.5, 0.5, 0.5));
 	cout << "Laduje skybox" << endl;
 	skybox = new Model("Modele/SkyBox.obj", "Tekstury/SkyBox.png", "Tekstury/SkyBox.png", 3, vec3(0,0,0), vec3(0,-1,0), vec3(1,1,1));
+	grass = new Model("Modele/Grass.obj", "Tekstury/Grass.png", "Tekstury/Grass.png", 3, vec3(0, 0, 0), vec3(0, -1, 0), vec3(1, 1, 1));
 
 	cout << "Laduje stany" << endl;
 	LoadStany();
@@ -422,6 +425,7 @@ void DeleteLvl()
 	delete alkohol;
 	delete czlowiek;
 	delete skybox;
+	delete grass;
 	delete[] stany;
 }
 
@@ -532,6 +536,7 @@ void drawScene(GLFWwindow* window, float angle_cam) {
 	drawObject(*czlowiek->GetAktModel(), shaderProgram, V, P, czlowiek->rotacja, czlowiek->translacja, czlowiek->skalowanie, 0);
 
 	drawObject(*skybox, shaderProgram, V, P, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1), 0);
+	drawObject(*grass, shaderProgram, V, P, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1), 0);
 
 	glDisableVertexAttribArray(0);
 	//Przerzuæ tylny bufor na przedni
