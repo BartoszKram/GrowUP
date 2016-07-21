@@ -21,7 +21,6 @@ void main(void) {
 	vec4 mV=normalize(vV); //normalizuj interpolowany wektor do zrodla swiatla w przestrzeni oka
 	vec4 mR=reflect(-mL,mN); //oblicz wektor odbity w przestrzeni oka
 	
-	
 	vec4 La=vec4(1,1,1,1); //Kolor swiatla otoczenia
 	
 	vec4 Md=texture(tex0,UV); //Kolor materialu dla swiatla rozproszonego
