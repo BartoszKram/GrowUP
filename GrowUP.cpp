@@ -525,14 +525,6 @@ void drawScene(GLFWwindow* window, float angle_cam) {
 	}
 	
 	//Czlowiek
-	if (czlowiek->GetAnimacja() == true && !czlowiek->GetStan())
-	{
-		czlowiek->ZacznijAnimacje();
-	}
-	else{
-		czlowiek->ZmienStan();
-	}
-
 	drawObject(*czlowiek->GetAktModel(), shaderProgram, V, P, czlowiek->rotacja, czlowiek->translacja, czlowiek->skalowanie, 0);
 
 	drawObject(*skybox, shaderProgram, V, P, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1), 0);
@@ -921,7 +913,7 @@ int main(void)
 			Ewoluuj();
 		}
 
-		if (glfwGetTime() > 0.01)
+		if (glfwGetTime() > 0.025)
 		{
 			angle_cam = cameraMove * glfwGetTime();
 			glfwSetTime(0); //Wyzeruj licznik czasu
@@ -933,11 +925,6 @@ int main(void)
 			czlowiek->Idz();
 			SetJasnosci();
 			drawScene(window, angle_cam); //Wykonaj procedurê rysuj¹c¹
-					
-			/*if (opoznienie < maxop)
-			{
-				opoznienie++;
-			}*/
 		}
 		glfwPollEvents(); //Wykonaj procedury callback w zaleznoœci od zdarzeñ jakie zasz³y.
 	}

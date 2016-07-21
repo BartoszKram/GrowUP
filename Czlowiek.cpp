@@ -7,14 +7,15 @@ Czlowiek::Czlowiek()
 {
 	stan = 0;
 	
-	char nazwa[30] = "Modele/Czlowiek";
+	char nazwa[30] = "Modele/Czlowiek00.obj";
 	n = 12;
 
 	for (int i = 1; i <= n; i++)
 	{
-		//char nazwa2[30];
-		
-		Model ludzik("Modele/Czlowiek101.obj", "Tekstury/Czlowiek.png", "Tekstury/Czlowiek.png", 3);
+		nazwa[15] = '0' + i/10;
+		nazwa[16] = '0' + i%10;
+
+		Model ludzik(nazwa, "Tekstury/Czlowiek.png", "Tekstury/Czlowiek.png", 3);
 		modele.push_back(ludzik);
 	}
 
@@ -46,42 +47,16 @@ Model* Czlowiek::GetAktModel()
 
 void Czlowiek::ZmienStan()
 {
-	if (this->stan != 0)
+	this->stan++;
+	if (this->stan >= this->n)
 	{
-		this->stan++;
-		if (this->stan >= this->n)
-		{
-			this->stan = 0;
-			this->animacja = false;
-		}
-	}
-}
-
-void Czlowiek::ZacznijAnimacje()
-{
-	if (this->stan == 1)
-	{
-		this->ZmienStan();
-	}
-	else
-	{
-		this->stan = 1;
+		this->stan = 0;
 	}
 }
 
 int Czlowiek::Getn()
 {
 	return this->n;
-}
-
-bool Czlowiek::GetAnimacja()
-{
-	return this->animacja;
-}
-
-void Czlowiek::SetAnimacja()
-{
-	this->animacja = true;
 }
 
 bool Czlowiek::GetStan()
@@ -130,6 +105,7 @@ void Czlowiek::Idz()
 			this->translacja += przem;
 
 			this->rotacja.y = ((-1 * 360 / M_PI *(atan2(this->cel.z - this->translacja.z, this->cel.x - this->translacja.x)) / 2) + 90) / 180 * M_PI;
+			this->ZmienStan();
 		}
 		else
 		{
@@ -142,6 +118,7 @@ void Czlowiek::Idz()
 			{
 				opoznienie = 20;
 			}
+			this->stan = 0;
 		}
 	}
 }

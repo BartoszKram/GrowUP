@@ -27,10 +27,7 @@ class Czlowiek
 		Model* GetModel(int n);
 		Model* GetAktModel();
 		void ZmienStan();
-		void ZacznijAnimacje();
 		int Getn();
-		bool GetAnimacja();
-		void SetAnimacja();
 		bool GetStan();
 		void SetCel(vec3 cel);
 		vec3 GetCel();
@@ -47,7 +44,6 @@ class Czlowiek
 		vector<Model> modele;
 		int stan;
 		int n;
-		bool animacja;
 		vec3 cel;
 		int opoznienie;
 };
