@@ -11,6 +11,8 @@ Lvl *alkohol;
 
 //Student chodzacy po planszy
 Czlowiek *czlowiek;
+//Swiatlo sloneczne
+Slonce *slonce;
 
 //SkyBox
 Model *skybox;
@@ -171,7 +173,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glfwSetKeyCallback(window, key_callback); //Zarejestruj procedurê obs³ugi klawiatury
 
 	shaderProgram = new ShaderProgram("vshader.txt", NULL, "fshader.txt"); //Wczytaj program cieniuj¹cy 
-
+	slonce = new Slonce();
 	//Czêœæ wczytuj¹ca modele i ustawiaj¹ca je na miejscach
 
 	for (int i = 0; i < czlowiek->Getn(); i++)
@@ -426,6 +428,7 @@ void DeleteLvl()
 	delete czlowiek;
 	delete skybox;
 	delete grass;
+	delete slonce;
 	delete[] stany;
 }
 
@@ -461,11 +464,12 @@ void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, vec3
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("M"), 1, false, glm::value_ptr(modelMatrix));
 	glUniform4f(shaderProgram->getUniformLocation("lightPos0"), 10, 10, 10, 1); //Przekazanie wspó³rzêdnych Ÿród³a œwiat³a do zmiennej jednorodnej lightPos0
 	glUniform1f(shaderProgram->getUniformLocation("relLevel"), model.relLevel);
-	
+	glUniform4f(shaderProgram->getUniformLocation("SunPos"), slonce->loc[stangry.nr_ruchu % 4].x, slonce->loc[stangry.nr_ruchu % 4].y, slonce->loc[stangry.nr_ruchu % 4].z, slonce->loc[stangry.nr_ruchu % 4].w);
+	glUniform4f(shaderProgram->getUniformLocation("SunCol"), slonce->color[stangry.nr_ruchu % 4].x, slonce->color[stangry.nr_ruchu % 4].y, slonce->color[stangry.nr_ruchu % 4].z, slonce->color[stangry.nr_ruchu % 4].w);
 	glUniform4f(shaderProgram->getUniformLocation("Mam"), jasnosc, jasnosc, jasnosc, 1);
 
 	//2.Bindowanie tekstury
-	glUniform1i(shaderProgram->getUniformLocation("myTextureSampler"), 0);
+	glUniform1i(shaderProgram->getUniformLocation("tex0"), 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, model.texModelu);
 	

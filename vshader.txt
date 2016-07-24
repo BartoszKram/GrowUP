@@ -4,6 +4,8 @@
 uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
+uniform vec4 SunPos;
+uniform vec4 SunCol;
 
 uniform vec4 lightPos0; //Wspolrzedne zrodla swiatla w przestrzeni swiata
 uniform vec4 Mam; //Kolor materialu dla swiatla otoczenia
@@ -13,11 +15,14 @@ in vec3 vertex; //wspolrzedne wierzcholka w przestrzeni modelu
 in vec2 vertexUV; //wspolrzedne teksturowania
 in vec3 normal; //wektor normalny w wierzcholku 
 
+
 //Zmienne interpolowane
 out vec2 UV;
 out vec4 vN; //interpolowany wektor normalny w przestrzeni oka
 out vec4 vV; //interpolowany wektor do obserwatora w przestrzeni oka
 out vec4 vL; //interpolowany wektor do zrodla swiatla w przestrzeni oka
+out vec4 vS;
+out vec4 SunColor;
 
 out vec4 Ma; //Interpolowany Kolor materialu dla swiatla otoczenia
 
@@ -27,8 +32,10 @@ void main(void) {
 	vN=normalize(V*M*vec4(normal,0.0)); //Oblicz i interpoluj wektor normalny w przestrzeni oka
 	vL=normalize(V*lightPos0-V*M*vec4(vertex,1.0)); //Oblicz i interpoluj wektor do zrodla swiatla w przestrzeni oka
 	vV=normalize(vec4(0,0,0,1)-V*M*vec4(vertex,1.0)); //Oblicz i interpoluj wektor do obserwatora w przestrzeni oka
-	
+	vS=normalize(V*SunPos-V*M*vec4(vertex,1.0));
+
 	//UV of the vertex
+	SunColor = SunCol;
 	UV = vertexUV;
 	Ma=Mam;
 }
