@@ -29,7 +29,9 @@
 #include "shaderprogram.h"
 #include "lodepng.h"
 #include "Lvl.h"
+#include "Slonce.h"
 
 using namespace std;
 using namespace glm;
 using namespace Models;
+using namespace Slonca;

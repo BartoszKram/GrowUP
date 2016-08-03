@@ -411,8 +411,8 @@ void LoadLvl()
 
 	czlowiek = new Czlowiek(rotacja, vec3(0, 0, 0), vec3(0.5, 0.5, 0.5));
 	cout << "Laduje skybox" << endl;
-	skybox = new Model("Modele/SkyBox.obj", "Tekstury/SkyBox.png", "Tekstury/SkyBox.png", 3, vec3(0,0,0), vec3(0,-1,0), vec3(1,1,1));
-	grass = new Model("Modele/Grass.obj", "Tekstury/Grass.png", "Tekstury/Grass.png", 3, vec3(0, 0, 0), vec3(0, -1, 0), vec3(1, 1, 1));
+	skybox = new Model("Modele/SkyBox.obj", "Tekstury/SkyBox.png", "Tekstury/SkyBox.png", 3, vec3(0,0,0), vec3(0,0,0), vec3(1,1,1));
+	grass = new Model("Modele/Grass.obj", "Tekstury/Grass.png", "Tekstury/Grass.png", 3, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 
 	cout << "Laduje stany" << endl;
 	LoadStany();
@@ -462,7 +462,10 @@ void drawObject(Model model, ShaderProgram *shaderProgram,mat4 mV, mat4 mP, vec3
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("P"), 1, false, glm::value_ptr(mP));
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("V"), 1, false, glm::value_ptr(mV));
 	glUniformMatrix4fv(shaderProgram->getUniformLocation("M"), 1, false, glm::value_ptr(modelMatrix));
-	glUniform4f(shaderProgram->getUniformLocation("lightPos0"), 10, 10, 10, 1); //Przekazanie wspó³rzêdnych Ÿród³a œwiat³a do zmiennej jednorodnej lightPos0
+	
+	//glUniform4f(shaderProgram->getUniformLocation("lightPos0"), 10, 10, 10, 1); //Przekazanie wspó³rzêdnych Ÿród³a œwiat³a do zmiennej jednorodnej lightPos0
+	glUniform4f(shaderProgram->getUniformLocation("lightPos0"), eye.x, eye.y, eye.z, 1); //Przekazanie wspó³rzêdnych Ÿród³a œwiat³a do zmiennej jednorodnej lightPos0
+
 	glUniform1f(shaderProgram->getUniformLocation("relLevel"), model.relLevel);
 	glUniform4f(shaderProgram->getUniformLocation("SunPos"), slonce->loc[stangry.nr_ruchu % 4].x, slonce->loc[stangry.nr_ruchu % 4].y, slonce->loc[stangry.nr_ruchu % 4].z, slonce->loc[stangry.nr_ruchu % 4].w);
 	glUniform4f(shaderProgram->getUniformLocation("SunCol"), slonce->color[stangry.nr_ruchu % 4].x, slonce->color[stangry.nr_ruchu % 4].y, slonce->color[stangry.nr_ruchu % 4].z, slonce->color[stangry.nr_ruchu % 4].w);

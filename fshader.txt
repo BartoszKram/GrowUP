@@ -16,12 +16,13 @@ out vec4 pixelColor; //Zmienna wyjsciowa fragment shadera. Zapisuje sie do niej 
 uniform sampler2D tex0; //zmienna reprezentujaca jednostke teksturuj¹c¹
 uniform int relLevel;
 
-void main(void) {
+void main(void)
+{
 	vec4 mN=normalize(vN); //normalizuj interpolowany wektor normalny w przestrzeni oka
 	vec4 mL=normalize(vL); //normalizuj interpolowany wektor do obserwatora w przestrzeni oka
 	vec4 mV=normalize(vV); //normalizuj interpolowany wektor do zrodla swiatla w przestrzeni oka
 	vec4 mR=reflect(-mL,mN); //oblicz wektor odbity w przestrzeni oka
-	
+
 	vec4 La=vec4(1,1,1,1); //Kolor swiatla otoczenia
 	
 	vec4 Md=texture(tex0,UV); //Kolor materialu dla swiatla rozproszonego
@@ -36,6 +37,6 @@ void main(void) {
 	
 	float nl1=max(0,dot(mN,vS));
 	float rv1=pow(max(0,dot(mN,vS)),shininess);
-
+	
 	pixelColor=Ma*La+(Md*Ld*nl+Ms*Ls*rv+Md*SunColor*nl1+Ms*SunColor*rv1)/2; //Oblicz model oswietlenia i zwroc jako kolor piksela
 }
